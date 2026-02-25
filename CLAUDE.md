@@ -7,21 +7,27 @@ No validation logic lives here — the schema engine handles that. No storage de
 ## Quick Start
 
 ```tsx
-import { defineBlock, text, richText, boolean } from "@nextlake/schema";
-import { BlockEditor, useBlockForm } from "@nextlake/editor";
+import { defineBlock, text, richText, boolean } from '@nextlake/schema';
+import { BlockEditor, useBlockForm } from '@nextlake/editor';
 
 const hero = defineBlock({
-  name: "hero",
+  name: 'hero',
   fields: {
-    title: text("Title"),
-    body: richText("Body"),
-    visible: boolean("Visible"),
+    title: text('Title'),
+    body: richText('Body'),
+    visible: boolean('Visible'),
   },
 });
 
 function HeroEditor() {
-  const [state, actions] = useBlockForm(hero, { title: "", body: "", visible: true });
-  return <BlockEditor block={hero} value={state.value} onChange={actions.onChange} />;
+  const [state, actions] = useBlockForm(hero, {
+    title: '',
+    body: '',
+    visible: true,
+  });
+  return (
+    <BlockEditor block={hero} value={state.value} onChange={actions.onChange} />
+  );
 }
 ```
 
@@ -35,14 +41,14 @@ make test          # run vitest (jsdom, no Docker needed)
 
 ## Architecture
 
-| File | Responsibility |
-|------|---------------|
-| `src/types.ts` | Shared prop types — `FieldEditorProps`, `BlockEditorProps`, `FieldOverrides` |
-| `src/utils.ts` | `unwrapSchema()` strips ZodOptional/ZodDefault wrappers; `inferUIHint()` maps Zod types to UIHints |
-| `src/BlockEditor.tsx` | Top-level component — takes `BlockDefinition`, iterates fields, delegates to `FieldRenderer` |
-| `src/FieldRenderer.tsx` | Dispatch — maps UIHint to field component, resolves overrides (field-name > UIHint > default) |
-| `src/fields/*.tsx` | Seven built-in field components: Text, RichText, Number, Boolean, Select, Array, Object |
-| `src/hooks/useBlockForm.ts` | Optional hook — manages form state, validation via schema engine, dirty tracking |
+| File                        | Responsibility                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/types.ts`              | Shared prop types — `FieldEditorProps`, `BlockEditorProps`, `FieldOverrides`                       |
+| `src/utils.ts`              | `unwrapSchema()` strips ZodOptional/ZodDefault wrappers; `inferUIHint()` maps Zod types to UIHints |
+| `src/BlockEditor.tsx`       | Top-level component — takes `BlockDefinition`, iterates fields, delegates to `FieldRenderer`       |
+| `src/FieldRenderer.tsx`     | Dispatch — maps UIHint to field component, resolves overrides (field-name > UIHint > default)      |
+| `src/fields/*.tsx`          | Seven built-in field components: Text, RichText, Number, Boolean, Select, Array, Object            |
+| `src/hooks/useBlockForm.ts` | Optional hook — manages form state, validation via schema engine, dirty tracking                   |
 
 ## Design Decisions
 

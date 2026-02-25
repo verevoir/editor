@@ -1,13 +1,18 @@
-import type { z } from "zod";
-import type { FieldEditorProps } from "../types.js";
-import { unwrapSchema, inferUIHint } from "../utils.js";
-import { FieldRenderer } from "../FieldRenderer.js";
+import type { z } from 'zod';
+import type { FieldEditorProps } from '../types.js';
+import { unwrapSchema, inferUIHint } from '../utils.js';
+import { FieldRenderer } from '../FieldRenderer.js';
 
-export function ObjectField({ name, field, value, onChange }: FieldEditorProps<Record<string, unknown>>) {
+export function ObjectField({
+  name,
+  field,
+  value,
+  onChange,
+}: FieldEditorProps<Record<string, unknown>>) {
   const data = value ?? {};
   const unwrapped = unwrapSchema(field.schema);
   const shape: Record<string, z.ZodTypeAny> =
-    unwrapped._def?.typeName === "ZodObject" ? unwrapped._def.shape() : {};
+    unwrapped._def?.typeName === 'ZodObject' ? unwrapped._def.shape() : {};
 
   const handleFieldChange = (fieldName: string, fieldValue: unknown) => {
     onChange({ ...data, [fieldName]: fieldValue });
@@ -25,7 +30,7 @@ export function ObjectField({ name, field, value, onChange }: FieldEditorProps<R
             meta: {
               label: key,
               ui: inferUIHint(subSchema),
-              required: subSchema._def?.typeName !== "ZodOptional",
+              required: subSchema._def?.typeName !== 'ZodOptional',
             },
           }}
           value={data[key]}

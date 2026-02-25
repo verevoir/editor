@@ -1,14 +1,19 @@
-import type { z } from "zod";
-import type { FieldEditorProps } from "../types.js";
-import { unwrapSchema, inferUIHint } from "../utils.js";
-import { FieldRenderer } from "../FieldRenderer.js";
+import type { z } from 'zod';
+import type { FieldEditorProps } from '../types.js';
+import { unwrapSchema, inferUIHint } from '../utils.js';
+import { FieldRenderer } from '../FieldRenderer.js';
 
-export function ArrayField({ name, field, value, onChange }: FieldEditorProps<unknown[]>) {
+export function ArrayField({
+  name,
+  field,
+  value,
+  onChange,
+}: FieldEditorProps<unknown[]>) {
   const items = value ?? [];
   const unwrapped = unwrapSchema(field.schema);
   const elementSchema: z.ZodTypeAny | undefined =
-    unwrapped._def?.typeName === "ZodArray" ? unwrapped._def.type : undefined;
-  const elementHint = elementSchema ? inferUIHint(elementSchema) : "text";
+    unwrapped._def?.typeName === 'ZodArray' ? unwrapped._def.type : undefined;
+  const elementHint = elementSchema ? inferUIHint(elementSchema) : 'text';
 
   const handleItemChange = (index: number, itemValue: unknown) => {
     const next = [...items];
@@ -17,7 +22,7 @@ export function ArrayField({ name, field, value, onChange }: FieldEditorProps<un
   };
 
   const handleAdd = () => {
-    onChange([...items, elementSchema ? getDefault(elementSchema) : ""]);
+    onChange([...items, elementSchema ? getDefault(elementSchema) : '']);
   };
 
   const handleRemove = (index: number) => {
@@ -32,12 +37,23 @@ export function ArrayField({ name, field, value, onChange }: FieldEditorProps<un
           {elementSchema && (
             <FieldRenderer
               name={`${name}.${index}`}
-              field={{ schema: elementSchema, meta: { label: `${field.meta.label} ${index + 1}`, ui: elementHint, required: true } }}
+              field={{
+                schema: elementSchema,
+                meta: {
+                  label: `${field.meta.label} ${index + 1}`,
+                  ui: elementHint,
+                  required: true,
+                },
+              }}
               value={item}
               onChange={(v) => handleItemChange(index, v)}
             />
           )}
-          <button type="button" onClick={() => handleRemove(index)} aria-label={`Remove ${field.meta.label} ${index + 1}`}>
+          <button
+            type="button"
+            onClick={() => handleRemove(index)}
+            aria-label={`Remove ${field.meta.label} ${index + 1}`}
+          >
             Remove
           </button>
         </div>
@@ -50,13 +66,13 @@ export function ArrayField({ name, field, value, onChange }: FieldEditorProps<un
 }
 
 function getDefault(schema: z.ZodTypeAny | undefined): unknown {
-  if (!schema) return "";
+  if (!schema) return '';
   const unwrapped = unwrapSchema(schema);
-  const name = unwrapped._def?.typeName ?? "";
-  if (name === "ZodString") return "";
-  if (name === "ZodNumber") return 0;
-  if (name === "ZodBoolean") return false;
-  if (name === "ZodArray") return [];
-  if (name === "ZodObject") return {};
-  return "";
+  const name = unwrapped._def?.typeName ?? '';
+  if (name === 'ZodString') return '';
+  if (name === 'ZodNumber') return 0;
+  if (name === 'ZodBoolean') return false;
+  if (name === 'ZodArray') return [];
+  if (name === 'ZodObject') return {};
+  return '';
 }

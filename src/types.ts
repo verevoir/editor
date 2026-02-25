@@ -1,9 +1,9 @@
-import type { ComponentType } from "react";
+import type { ComponentType } from 'react';
 import type {
   FieldDefinition,
   FieldRecord,
   BlockDefinition,
-} from "@nextlake/schema";
+} from '@nextlake/schema';
 
 /** Callback for field value changes */
 export type FieldChangeHandler<T = unknown> = (value: T) => void;
@@ -16,11 +16,13 @@ export interface FieldEditorProps<T = unknown> {
   onChange: FieldChangeHandler<T>;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** Map of field names or UIHints to custom field components */
 export type FieldOverrides = Record<
   string,
   ComponentType<FieldEditorProps<any>>
 >;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** Props for the top-level BlockEditor component */
 export interface BlockEditorProps {

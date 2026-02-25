@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from "react";
-import type { BlockDefinition, FieldRecord } from "@nextlake/schema";
+import { useState, useCallback, useRef } from 'react';
+import type { BlockDefinition, FieldRecord } from '@nextlake/schema';
 
 export interface BlockFormState {
   value: Record<string, unknown>;
@@ -38,7 +38,7 @@ export function useBlockForm(
       if (isZodError(err)) {
         const fieldErrors: Record<string, string> = {};
         for (const issue of err.issues) {
-          const path = issue.path.join(".");
+          const path = issue.path.join('.');
           if (!fieldErrors[path]) {
             fieldErrors[path] = issue.message;
           }
@@ -57,15 +57,20 @@ export function useBlockForm(
 
   const valid = Object.keys(errors).length === 0;
 
-  return [{ value, errors, dirty, valid }, { onChange, validate, reset }];
+  return [
+    { value, errors, dirty, valid },
+    { onChange, validate, reset },
+  ];
 }
 
 /** Duck-type check for ZodError to work across Zod instances */
-function isZodError(err: unknown): err is { issues: Array<{ path: (string | number)[]; message: string }> } {
+function isZodError(
+  err: unknown,
+): err is { issues: Array<{ path: (string | number)[]; message: string }> } {
   return (
-    typeof err === "object" &&
+    typeof err === 'object' &&
     err !== null &&
-    "issues" in err &&
-    Array.isArray((err as any).issues)
+    'issues' in err &&
+    Array.isArray((err as Record<string, unknown>).issues)
   );
 }

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import {
   defineBlock,
   text,
@@ -9,67 +9,72 @@ import {
   select,
   array,
   object,
-} from "@nextlake/schema";
-import { BlockEditor } from "../src/BlockEditor.js";
-import type { FieldEditorProps } from "../src/types.js";
+} from '@nextlake/schema';
+import { BlockEditor } from '../src/BlockEditor.js';
+import type { FieldEditorProps } from '../src/types.js';
 
 const hero = defineBlock({
-  name: "hero",
+  name: 'hero',
   fields: {
-    title: text("Title").max(100),
-    subtitle: text("Subtitle").optional(),
-    body: richText("Body"),
-    order: number("Order").int(),
-    visible: boolean("Visible"),
-    status: select("Status", ["draft", "published", "archived"]),
+    title: text('Title').max(100),
+    subtitle: text('Subtitle').optional(),
+    body: richText('Body'),
+    order: number('Order').int(),
+    visible: boolean('Visible'),
+    status: select('Status', ['draft', 'published', 'archived']),
   },
 });
 
 const heroData = {
-  title: "Welcome",
-  subtitle: "Hello world",
-  body: "<p>Content</p>",
+  title: 'Welcome',
+  subtitle: 'Hello world',
+  body: '<p>Content</p>',
   order: 1,
   visible: true,
-  status: "draft",
+  status: 'draft',
 };
 
-describe("BlockEditor", () => {
-  it("renders all fields from a block definition", () => {
+describe('BlockEditor', () => {
+  it('renders all fields from a block definition', () => {
     render(<BlockEditor block={hero} value={heroData} onChange={() => {}} />);
-    expect(screen.getByLabelText("Title")).toHaveValue("Welcome");
-    expect(screen.getByLabelText("Subtitle")).toHaveValue("Hello world");
-    expect(screen.getByLabelText("Body")).toHaveValue("<p>Content</p>");
-    expect(screen.getByLabelText("Order")).toHaveValue(1);
-    expect(screen.getByLabelText("Visible")).toBeChecked();
-    expect(screen.getByLabelText("Status")).toHaveValue("draft");
+    expect(screen.getByLabelText('Title')).toHaveValue('Welcome');
+    expect(screen.getByLabelText('Subtitle')).toHaveValue('Hello world');
+    expect(screen.getByLabelText('Body')).toHaveValue('<p>Content</p>');
+    expect(screen.getByLabelText('Order')).toHaveValue(1);
+    expect(screen.getByLabelText('Visible')).toBeChecked();
+    expect(screen.getByLabelText('Status')).toHaveValue('draft');
   });
 
-  it("sets data-block attribute with block name", () => {
+  it('sets data-block attribute with block name', () => {
     const { container } = render(
       <BlockEditor block={hero} value={heroData} onChange={() => {}} />,
     );
     expect(container.querySelector("[data-block='hero']")).toBeInTheDocument();
   });
 
-  it("calls onChange with updated data when a field changes", () => {
+  it('calls onChange with updated data when a field changes', () => {
     const onChange = vi.fn();
     render(<BlockEditor block={hero} value={heroData} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Updated" } });
-    expect(onChange).toHaveBeenCalledWith({ ...heroData, title: "Updated" });
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Updated' },
+    });
+    expect(onChange).toHaveBeenCalledWith({ ...heroData, title: 'Updated' });
   });
 
-  it("renders correct input types for each UIHint", () => {
+  it('renders correct input types for each UIHint', () => {
     render(<BlockEditor block={hero} value={heroData} onChange={() => {}} />);
-    expect(screen.getByLabelText("Title")).toHaveAttribute("type", "text");
-    expect(screen.getByLabelText("Body").tagName).toBe("TEXTAREA");
-    expect(screen.getByLabelText("Order")).toHaveAttribute("type", "number");
-    expect(screen.getByLabelText("Visible")).toHaveAttribute("type", "checkbox");
-    expect(screen.getByLabelText("Status").tagName).toBe("SELECT");
+    expect(screen.getByLabelText('Title')).toHaveAttribute('type', 'text');
+    expect(screen.getByLabelText('Body').tagName).toBe('TEXTAREA');
+    expect(screen.getByLabelText('Order')).toHaveAttribute('type', 'number');
+    expect(screen.getByLabelText('Visible')).toHaveAttribute(
+      'type',
+      'checkbox',
+    );
+    expect(screen.getByLabelText('Status').tagName).toBe('SELECT');
   });
 
-  it("supports field overrides by field name", () => {
-    function CustomTitle({ name, value }: FieldEditorProps<string>) {
+  it('supports field overrides by field name', () => {
+    function CustomTitle({ value }: FieldEditorProps<string>) {
       return <div data-testid="custom-title">{value}</div>;
     }
     render(
@@ -80,12 +85,12 @@ describe("BlockEditor", () => {
         overrides={{ title: CustomTitle }}
       />,
     );
-    expect(screen.getByTestId("custom-title")).toHaveTextContent("Welcome");
+    expect(screen.getByTestId('custom-title')).toHaveTextContent('Welcome');
     // Other fields still render normally
-    expect(screen.getByLabelText("Body")).toBeInTheDocument();
+    expect(screen.getByLabelText('Body')).toBeInTheDocument();
   });
 
-  it("supports field overrides by UIHint", () => {
+  it('supports field overrides by UIHint', () => {
     function CustomRichText({ value }: FieldEditorProps<string>) {
       return <div data-testid="custom-rich">{value}</div>;
     }
@@ -94,21 +99,23 @@ describe("BlockEditor", () => {
         block={hero}
         value={heroData}
         onChange={() => {}}
-        overrides={{ "rich-text": CustomRichText }}
+        overrides={{ 'rich-text': CustomRichText }}
       />,
     );
-    expect(screen.getByTestId("custom-rich")).toHaveTextContent("<p>Content</p>");
+    expect(screen.getByTestId('custom-rich')).toHaveTextContent(
+      '<p>Content</p>',
+    );
   });
 
-  it("renders a block with array and object fields", () => {
+  it('renders a block with array and object fields', () => {
     const page = defineBlock({
-      name: "page",
+      name: 'page',
       fields: {
-        title: text("Title"),
-        tags: array("Tags", text("Tag")),
-        meta: object("Metadata", {
-          author: text("Author"),
-          year: number("Year"),
+        title: text('Title'),
+        tags: array('Tags', text('Tag')),
+        meta: object('Metadata', {
+          author: text('Author'),
+          year: number('Year'),
         }),
       },
     });
@@ -117,18 +124,18 @@ describe("BlockEditor", () => {
       <BlockEditor
         block={page}
         value={{
-          title: "My Page",
-          tags: ["react", "nextlake"],
-          meta: { author: "Alice", year: 2025 },
+          title: 'My Page',
+          tags: ['react', 'nextlake'],
+          meta: { author: 'Alice', year: 2025 },
         }}
         onChange={() => {}}
       />,
     );
 
-    expect(screen.getByLabelText("Title")).toHaveValue("My Page");
-    expect(screen.getByDisplayValue("react")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("nextlake")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Alice")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("2025")).toBeInTheDocument();
+    expect(screen.getByLabelText('Title')).toHaveValue('My Page');
+    expect(screen.getByDisplayValue('react')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('nextlake')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Alice')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('2025')).toBeInTheDocument();
   });
 });

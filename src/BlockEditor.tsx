@@ -1,7 +1,12 @@
-import type { BlockEditorProps } from "./types.js";
-import { FieldRenderer } from "./FieldRenderer.js";
+import type { BlockEditorProps } from './types.js';
+import { FieldRenderer } from './FieldRenderer.js';
 
-export function BlockEditor({ block, value, onChange, overrides }: BlockEditorProps) {
+export function BlockEditor({
+  block,
+  value,
+  onChange,
+  overrides,
+}: BlockEditorProps) {
   const handleFieldChange = (fieldName: string, fieldValue: unknown) => {
     onChange({ ...value, [fieldName]: fieldValue });
   };

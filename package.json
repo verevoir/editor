@@ -18,7 +18,9 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@nextlake/schema": "file:../schema-engine"
@@ -29,15 +31,21 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.0.0",
+    "@eslint/js": "^9.39.3",
     "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^25.0.0",
+    "prettier": "^3.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.7.0",
+    "typescript-eslint": "^8.56.1",
     "vitest": "^3.0.0",
     "zod": "^3.24.0"
   }

@@ -1,6 +1,11 @@
-import type { FieldEditorProps } from "../types.js";
+import type { FieldEditorProps } from '../types.js';
 
-export function BooleanField({ name, field, value, onChange }: FieldEditorProps<boolean>) {
+export function BooleanField({
+  name,
+  field,
+  value,
+  onChange,
+}: FieldEditorProps<boolean>) {
   return (
     <div data-field={name}>
       <label htmlFor={name}>

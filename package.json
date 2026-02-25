@@ -16,14 +16,19 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:adsurg/next-lake-editor.git"
+  },
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsup",
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@nextlake/schema": "file:../schema-engine"
+    "@nextlake/schema": "git+ssh://git@github.com:adsurg/next-lake-schema-engine.git#v0.1.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

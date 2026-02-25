@@ -1,19 +1,31 @@
 import { useState, useCallback, useRef } from 'react';
 import type { BlockDefinition, FieldRecord } from '@nextlake/schema';
 
+/** Current state of a block form managed by {@link useBlockForm}. */
 export interface BlockFormState {
   value: Record<string, unknown>;
+  /** Field-path → error message. Empty when valid. Populated after `validate()` fails. */
   errors: Record<string, string>;
+  /** `true` once `onChange` has been called at least once since the last reset. */
   dirty: boolean;
+  /** `true` when `errors` is empty. Does not eagerly re-validate — reflects the last `validate()` call. */
   valid: boolean;
 }
 
+/** Actions returned by {@link useBlockForm} to mutate form state. */
 export interface BlockFormActions {
   onChange: (data: Record<string, unknown>) => void;
+  /** Run block validation. Returns `true` if valid, `false` if not (and populates `errors`). */
   validate: () => boolean;
+  /** Reset to the initial data passed to the hook. Clears errors and dirty flag. */
   reset: () => void;
 }
 
+/**
+ * React hook that manages form state for a block definition.
+ * Returns `[state, actions]` — pass `state.value` and `actions.onChange` to `BlockEditor`.
+ * Validation is explicit: call `actions.validate()` to populate `state.errors`.
+ */
 export function useBlockForm(
   block: BlockDefinition<FieldRecord>,
   initialData: Record<string, unknown>,

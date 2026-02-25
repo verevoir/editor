@@ -18,7 +18,7 @@ export function unwrapSchema(schema: z.ZodTypeAny): z.ZodTypeAny {
   return schema;
 }
 
-/** Infer a UIHint from a Zod schema type (for nested fields without FieldMeta) */
+/** Infer a UIHint from a raw Zod schema type. Used for nested fields inside arrays/objects that lack FieldMeta. Falls back to `'text'`. */
 export function inferUIHint(schema: z.ZodTypeAny): UIHint {
   const unwrapped = unwrapSchema(schema);
   const name = typeName(unwrapped);

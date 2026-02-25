@@ -1,6 +1,11 @@
 import type { BlockEditorProps } from './types.js';
 import { FieldRenderer } from './FieldRenderer.js';
 
+/**
+ * Top-level editor component. Renders a form for a block definition.
+ * Fully controlled — pass `value` and `onChange`, no internal form state.
+ * Does not render a `<form>` tag; the developer controls submission.
+ */
 export function BlockEditor({
   block,
   value,

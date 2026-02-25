@@ -17,7 +17,7 @@ export interface FieldEditorProps<T = unknown> {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/** Map of field names or UIHints to custom field components */
+/** Map of field names or UIHints to custom React components. Field-name keys take priority over UIHint keys. */
 export type FieldOverrides = Record<
   string,
   ComponentType<FieldEditorProps<any>>

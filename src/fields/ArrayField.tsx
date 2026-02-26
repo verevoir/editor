@@ -39,11 +39,16 @@ export function ArrayField({
               name={`${name}.${index}`}
               field={{
                 schema: elementSchema,
-                meta: {
-                  label: `${field.meta.label} ${index + 1}`,
-                  ui: elementHint,
-                  required: true,
-                },
+                meta: field.meta.itemMeta
+                  ? {
+                      ...field.meta.itemMeta,
+                      label: `${field.meta.label} ${index + 1}`,
+                    }
+                  : {
+                      label: `${field.meta.label} ${index + 1}`,
+                      ui: elementHint,
+                      required: true,
+                    },
               }}
               value={item}
               onChange={(v) => handleItemChange(index, v)}

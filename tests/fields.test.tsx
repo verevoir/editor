@@ -8,6 +8,7 @@ import {
   select,
   array,
   object,
+  reference,
 } from '@nextlake/schema';
 import { TextField } from '../src/fields/TextField.js';
 import { RichTextField } from '../src/fields/RichTextField.js';
@@ -16,6 +17,8 @@ import { BooleanField } from '../src/fields/BooleanField.js';
 import { SelectField } from '../src/fields/SelectField.js';
 import { ArrayField } from '../src/fields/ArrayField.js';
 import { ObjectField } from '../src/fields/ObjectField.js';
+import { ReferenceField } from '../src/fields/ReferenceField.js';
+import { ReferenceOptionsProvider } from '../src/ReferenceOptionsContext.js';
 
 describe('TextField', () => {
   it('renders a text input with label', () => {
@@ -258,6 +261,67 @@ describe('ArrayField', () => {
     );
     expect(screen.getByText('Add Tags')).toBeInTheDocument();
     expect(screen.queryByText('Remove')).not.toBeInTheDocument();
+  });
+});
+
+describe('ReferenceField', () => {
+  const authorRef = reference('Author', 'author');
+
+  it('renders a select with options from context', () => {
+    render(
+      <ReferenceOptionsProvider
+        options={{
+          author: [
+            { id: 'uuid-1', label: 'Alice' },
+            { id: 'uuid-2', label: 'Bob' },
+          ],
+        }}
+      >
+        <ReferenceField
+          name="author"
+          field={authorRef}
+          value="uuid-1"
+          onChange={() => {}}
+        />
+      </ReferenceOptionsProvider>,
+    );
+    expect(screen.getByLabelText('Author')).toHaveValue('uuid-1');
+    // 2 options + placeholder
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+  });
+
+  it('renders an empty select without context', () => {
+    render(
+      <ReferenceField
+        name="author"
+        field={authorRef}
+        value=""
+        onChange={() => {}}
+      />,
+    );
+    // Only the placeholder option
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    expect(screen.getByText('Select...')).toBeInTheDocument();
+  });
+
+  it('calls onChange with selected id', () => {
+    const onChange = vi.fn();
+    render(
+      <ReferenceOptionsProvider
+        options={{ author: [{ id: 'uuid-1', label: 'Alice' }] }}
+      >
+        <ReferenceField
+          name="author"
+          field={authorRef}
+          value=""
+          onChange={onChange}
+        />
+      </ReferenceOptionsProvider>,
+    );
+    fireEvent.change(screen.getByLabelText('Author'), {
+      target: { value: 'uuid-1' },
+    });
+    expect(onChange).toHaveBeenCalledWith('uuid-1');
   });
 });
 

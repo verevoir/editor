@@ -6,6 +6,7 @@ import { BooleanField } from './fields/BooleanField.js';
 import { SelectField } from './fields/SelectField.js';
 import { ArrayField } from './fields/ArrayField.js';
 import { ObjectField } from './fields/ObjectField.js';
+import { ReferenceField } from './fields/ReferenceField.js';
 import type { ComponentType } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +18,7 @@ const builtInFields: Record<string, ComponentType<FieldEditorProps<any>>> = {
   select: SelectField,
   array: ArrayField,
   object: ObjectField,
+  reference: ReferenceField,
 };
 
 export interface FieldRendererProps extends FieldEditorProps {

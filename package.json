@@ -1,6 +1,6 @@
 {
   "name": "@nextlake/editor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lightweight React content editing components driven by NextLake schema definitions",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -28,7 +28,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@nextlake/schema": "git+ssh://git@github.com:adsurg/next-lake-schema-engine.git#v0.1.0"
+    "@nextlake/schema": "git+ssh://git@github.com:adsurg/next-lake-schema-engine.git#v0.2.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

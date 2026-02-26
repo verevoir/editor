@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { text, richText, number, boolean, select } from '@nextlake/schema';
+import {
+  text,
+  richText,
+  number,
+  boolean,
+  select,
+  reference,
+} from '@nextlake/schema';
 import { FieldRenderer } from '../src/FieldRenderer.js';
 import type { FieldEditorProps } from '../src/types.js';
 
@@ -63,6 +70,19 @@ describe('FieldRenderer', () => {
       />,
     );
     expect(screen.getByLabelText('Status').tagName).toBe('SELECT');
+  });
+
+  it('renders ReferenceField for reference UIHint', () => {
+    const field = reference('Author', 'author');
+    render(
+      <FieldRenderer
+        name="author"
+        field={field}
+        value=""
+        onChange={() => {}}
+      />,
+    );
+    expect(screen.getByLabelText('Author').tagName).toBe('SELECT');
   });
 
   it('shows fallback for unknown UIHint', () => {

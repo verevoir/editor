@@ -9,8 +9,10 @@ import {
   select,
   array,
   object,
+  reference,
 } from '@nextlake/schema';
 import { BlockEditor } from '../src/BlockEditor.js';
+import { ReferenceOptionsProvider } from '../src/ReferenceOptionsContext.js';
 import type { FieldEditorProps } from '../src/types.js';
 
 const hero = defineBlock({
@@ -105,6 +107,71 @@ describe('BlockEditor', () => {
     expect(screen.getByTestId('custom-rich')).toHaveTextContent(
       '<p>Content</p>',
     );
+  });
+
+  it('renders a block with reference field and provider', () => {
+    const article = defineBlock({
+      name: 'article',
+      fields: {
+        title: text('Title'),
+        author: reference('Author', 'author'),
+      },
+    });
+
+    render(
+      <ReferenceOptionsProvider
+        options={{
+          author: [
+            { id: 'uuid-1', label: 'Alice' },
+            { id: 'uuid-2', label: 'Bob' },
+          ],
+        }}
+      >
+        <BlockEditor
+          block={article}
+          value={{ title: 'My Article', author: 'uuid-1' }}
+          onChange={() => {}}
+        />
+      </ReferenceOptionsProvider>,
+    );
+
+    expect(screen.getByLabelText('Title')).toHaveValue('My Article');
+    expect(screen.getByLabelText('Author')).toHaveValue('uuid-1');
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('Bob')).toBeInTheDocument();
+  });
+
+  it('renders a block with array of references', () => {
+    const article = defineBlock({
+      name: 'article',
+      fields: {
+        title: text('Title'),
+        reviewers: array('Reviewers', reference('Reviewer', 'author')),
+      },
+    });
+
+    render(
+      <ReferenceOptionsProvider
+        options={{
+          author: [
+            { id: 'uuid-1', label: 'Alice' },
+            { id: 'uuid-2', label: 'Bob' },
+          ],
+        }}
+      >
+        <BlockEditor
+          block={article}
+          value={{ title: 'My Article', reviewers: ['uuid-2'] }}
+          onChange={() => {}}
+        />
+      </ReferenceOptionsProvider>,
+    );
+
+    expect(screen.getByLabelText('Title')).toHaveValue('My Article');
+    // Array of references: the item should render as a select with the value uuid-2
+    const reviewerSelect = screen.getByLabelText('Reviewers 1');
+    expect(reviewerSelect.tagName).toBe('SELECT');
+    expect(reviewerSelect).toHaveValue('uuid-2');
   });
 
   it('renders a block with array and object fields', () => {

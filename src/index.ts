@@ -10,6 +10,13 @@ export { BooleanField } from './fields/BooleanField.js';
 export { SelectField } from './fields/SelectField.js';
 export { ArrayField } from './fields/ArrayField.js';
 export { ObjectField } from './fields/ObjectField.js';
+export { ReferenceField } from './fields/ReferenceField.js';
+
+// Reference context
+export {
+  ReferenceOptionsProvider,
+  useReferenceOptions,
+} from './ReferenceOptionsContext.js';
 
 // Hooks
 export { useBlockForm } from './hooks/useBlockForm.js';
@@ -27,3 +34,8 @@ export type {
 
 export type { FieldRendererProps } from './FieldRenderer.js';
 export type { BlockFormState, BlockFormActions } from './hooks/useBlockForm.js';
+export type {
+  ReferenceOption,
+  ReferenceOptionsMap,
+  ReferenceOptionsProviderProps,
+} from './ReferenceOptionsContext.js';

@@ -7,7 +7,7 @@ import {
   boolean,
   select,
   reference,
-} from '@nextlake/schema';
+} from '@verevoir/schema';
 import { FieldRenderer } from '../src/FieldRenderer.js';
 import type { FieldEditorProps } from '../src/types.js';
 

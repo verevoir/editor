@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import type { UIHint } from '@nextlake/schema';
+import type { UIHint } from '@verevoir/schema';
 
 /**
  * Get the Zod type name from a schema's _def.

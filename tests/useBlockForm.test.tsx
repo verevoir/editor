@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { defineBlock, text, number, boolean } from '@nextlake/schema';
+import { defineBlock, text, number, boolean } from '@verevoir/schema';
 import { useBlockForm } from '../src/hooks/useBlockForm.js';
 
 const hero = defineBlock({

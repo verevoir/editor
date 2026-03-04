@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import type { BlockDefinition, FieldRecord } from '@nextlake/schema';
+import type { BlockDefinition, FieldRecord } from '@verevoir/schema';
 
 /** Current state of a block form managed by {@link useBlockForm}. */
 export interface BlockFormState {

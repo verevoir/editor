@@ -3,7 +3,7 @@ import type {
   FieldDefinition,
   FieldRecord,
   BlockDefinition,
-} from '@nextlake/schema';
+} from '@verevoir/schema';
 
 /** Callback for field value changes */
 export type FieldChangeHandler<T = unknown> = (value: T) => void;

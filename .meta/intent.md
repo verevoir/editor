@@ -1,4 +1,4 @@
-# Intent — @nextlake/editor
+# Intent — @verevoir/editor
 
 ## Purpose
 
@@ -29,5 +29,5 @@ Auto-render content editing forms from schema engine block definitions so develo
 ## Constraints
 
 - React is the only UI framework dependency
-- No runtime dependency on `@nextlake/storage` or `@nextlake/access`
+- No runtime dependency on `@verevoir/storage` or `@verevoir/access`
 - Rich text is a textarea in v1 — the override mechanism is the escape hatch for richer editors

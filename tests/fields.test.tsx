@@ -9,7 +9,7 @@ import {
   array,
   object,
   reference,
-} from '@nextlake/schema';
+} from '@verevoir/schema';
 import { TextField } from '../src/fields/TextField.js';
 import { RichTextField } from '../src/fields/RichTextField.js';
 import { NumberField } from '../src/fields/NumberField.js';

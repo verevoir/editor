@@ -1,13 +1,13 @@
-# @nextlake/editor
+# @verevoir/editor
 
-Lightweight React components that auto-render content editing forms from [`@nextlake/schema`](https://github.com/adsurg/next-lake-schema-engine) block definitions. Pass a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
+Lightweight React components that auto-render content editing forms from [`@verevoir/schema`](https://github.com/adsurg/next-lake-schema-engine) block definitions. Pass a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
 
 No validation logic lives here — the schema engine handles that. No storage dependency — the editor is pure UI.
 
 ## Install
 
 ```bash
-npm install @nextlake/editor
+npm install @verevoir/editor
 ```
 
 **Peer dependencies:** `react`, `react-dom`, and `zod` must be installed in your project to avoid duplicate instances.
@@ -15,8 +15,8 @@ npm install @nextlake/editor
 ## Quick Start
 
 ```tsx
-import { defineBlock, text, richText, boolean } from '@nextlake/schema';
-import { BlockEditor, useBlockForm } from '@nextlake/editor';
+import { defineBlock, text, richText, boolean } from '@verevoir/schema';
+import { BlockEditor, useBlockForm } from '@verevoir/editor';
 
 const hero = defineBlock({
   name: 'hero',
@@ -61,7 +61,7 @@ function HeroEditor() {
 ## Development
 
 ```bash
-npm install    # Install dependencies (links @nextlake/schema from ../schema-engine)
+npm install    # Install dependencies (links @verevoir/schema from ../schema-engine)
 make build     # Compile via tsup (ESM + CJS + .d.ts)
 make test      # Run vitest (jsdom, no Docker needed)
 make lint      # Check formatting

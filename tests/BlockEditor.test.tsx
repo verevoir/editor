@@ -10,7 +10,7 @@ import {
   array,
   object,
   reference,
-} from '@nextlake/schema';
+} from '@verevoir/schema';
 import { BlockEditor } from '../src/BlockEditor.js';
 import { ReferenceOptionsProvider } from '../src/ReferenceOptionsContext.js';
 import type { FieldEditorProps } from '../src/types.js';

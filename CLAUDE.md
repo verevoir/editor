@@ -1,14 +1,14 @@
-# @nextlake/editor
+# @verevoir/editor
 
-Lightweight React components that auto-render content editing forms from `@nextlake/schema` block definitions. The developer passes a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
+Lightweight React components that auto-render content editing forms from `@verevoir/schema` block definitions. The developer passes a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
 
 No validation logic lives here — the schema engine handles that. No storage dependency — the editor is pure UI.
 
 ## Quick Start
 
 ```tsx
-import { defineBlock, text, richText, boolean } from '@nextlake/schema';
-import { BlockEditor, useBlockForm } from '@nextlake/editor';
+import { defineBlock, text, richText, boolean } from '@verevoir/schema';
+import { BlockEditor, useBlockForm } from '@verevoir/editor';
 
 const hero = defineBlock({
   name: 'hero',
@@ -34,7 +34,7 @@ function HeroEditor() {
 ## Setup
 
 ```bash
-npm install        # install dependencies (links @nextlake/schema from ../schema-engine)
+npm install        # install dependencies (links @verevoir/schema from ../schema-engine)
 make build         # compile via tsup (ESM + CJS + .d.ts)
 make test          # run vitest (jsdom, no Docker needed)
 ```

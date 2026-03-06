@@ -47,9 +47,11 @@ make test          # run vitest (jsdom, no Docker needed)
 | `src/utils.ts`                    | `unwrapSchema()` strips ZodOptional/ZodDefault wrappers; `inferUIHint()` maps Zod types to UIHints                 |
 | `src/BlockEditor.tsx`             | Top-level component — takes `BlockDefinition`, iterates fields, delegates to `FieldRenderer`                       |
 | `src/FieldRenderer.tsx`           | Dispatch — maps UIHint to field component, resolves overrides (field-name > UIHint > default)                      |
+| `src/PreviewFrame.tsx`            | Viewport-switching preview with zoom — renders children in a scaled, width-constrained surface                      |
 | `src/fields/*.tsx`                | Eight built-in field components: Text, RichText, Number, Boolean, Select, Array, Object, Reference                 |
 | `src/ReferenceOptionsContext.tsx` | `ReferenceOptionsProvider` + `useReferenceOptions` — React context providing reference options keyed by block type |
 | `src/hooks/useBlockForm.ts`       | Optional hook — manages form state, validation via schema engine, dirty tracking                                   |
+| `src/styles/*.css`                | Optional example CSS for PreviewFrame and BlockEditor forms — import to use, tree-shakes if not                    |
 
 ## Design Decisions
 

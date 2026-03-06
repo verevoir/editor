@@ -39,6 +39,53 @@ function HeroEditor() {
 }
 ```
 
+## Preview Frame
+
+Viewport-switching preview container with zoom control. Renders children in a scaled, width-constrained surface — no knowledge of content blocks.
+
+```tsx
+import { PreviewFrame } from '@verevoir/editor';
+
+<PreviewFrame defaultViewport="Tablet">
+  <h1>{page.title}</h1>
+  <div dangerouslySetInnerHTML={{ __html: page.body }} />
+</PreviewFrame>;
+```
+
+Custom viewports:
+
+```tsx
+<PreviewFrame
+  viewports={[
+    { label: 'Small', width: 320 },
+    { label: 'Large', width: 1440 },
+  ]}
+  defaultViewport="Large"
+>
+  {children}
+</PreviewFrame>
+```
+
+## Example Styles
+
+The editor renders unstyled HTML with `data-` attributes. Optional CSS files provide a sensible starting point — import them to use, or copy and adapt:
+
+```tsx
+// Style BlockEditor form fields
+import '@verevoir/editor/styles/editor-form.css';
+
+// Style PreviewFrame
+import '@verevoir/editor/styles/preview-frame.css';
+```
+
+For `editor-form.css`, wrap your `BlockEditor` in a container with `data-editor-form`:
+
+```tsx
+<div data-editor-form>
+  <BlockEditor block={block} value={value} onChange={onChange} />
+</div>
+```
+
 ## Architecture
 
 | File                        | Responsibility                                                                                     |
@@ -47,8 +94,10 @@ function HeroEditor() {
 | `src/utils.ts`              | `unwrapSchema()` strips ZodOptional/ZodDefault wrappers; `inferUIHint()` maps Zod types to UIHints |
 | `src/BlockEditor.tsx`       | Top-level component — takes `BlockDefinition`, iterates fields, delegates to `FieldRenderer`       |
 | `src/FieldRenderer.tsx`     | Dispatch — maps UIHint to field component, resolves overrides (field-name > UIHint > default)      |
-| `src/fields/*.tsx`          | Seven built-in field components: Text, RichText, Number, Boolean, Select, Array, Object            |
+| `src/PreviewFrame.tsx`      | Viewport-switching preview with zoom — renders children in a scaled, width-constrained surface     |
+| `src/fields/*.tsx`          | Eight built-in field components: Text, RichText, Number, Boolean, Select, Array, Object, Reference |
 | `src/hooks/useBlockForm.ts` | Optional hook — manages form state, validation via schema engine, dirty tracking                   |
+| `src/styles/*.css`          | Optional example CSS for PreviewFrame and BlockEditor forms                                        |
 
 ## Design Decisions
 

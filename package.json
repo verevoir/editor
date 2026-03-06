@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com:adsurg/next-lake-editor.git"
+    "url": "git+ssh://git@github.com:verevoir/editor.git"
   },
   "scripts": {
     "prepare": "npm run build",

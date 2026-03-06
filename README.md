@@ -1,6 +1,6 @@
 # @verevoir/editor
 
-Lightweight React components that auto-render content editing forms from [`@verevoir/schema`](https://github.com/adsurg/next-lake-schema-engine) block definitions. Pass a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
+Lightweight React components that auto-render content editing forms from [`@verevoir/schema`](https://github.com/verevoir/schema-engine) block definitions. Pass a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
 
 No validation logic lives here — the schema engine handles that. No storage dependency — the editor is pure UI.
 

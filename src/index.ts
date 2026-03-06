@@ -21,6 +21,9 @@ export {
 // Hooks
 export { useBlockForm } from './hooks/useBlockForm.js';
 
+// Preview
+export { PreviewFrame } from './PreviewFrame.js';
+
 // Utilities
 export { unwrapSchema, inferUIHint } from './utils.js';
 
@@ -39,3 +42,5 @@ export type {
   ReferenceOptionsMap,
   ReferenceOptionsProviderProps,
 } from './ReferenceOptionsContext.js';
+
+export type { Viewport, PreviewFrameProps } from './PreviewFrame.js';

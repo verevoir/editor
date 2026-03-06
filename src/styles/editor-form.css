@@ -1,0 +1,64 @@
+/*
+ * Example styles for BlockEditor field output from @verevoir/editor.
+ *
+ * Import this file to get a sensible default form appearance:
+ *   import '@verevoir/editor/styles/editor-form.css';
+ *
+ * Or copy and adapt these styles in your own CSS.
+ * All selectors use data attributes — no class names needed.
+ *
+ * Wrap your BlockEditor in a container with [data-editor-form]:
+ *   <div data-editor-form>
+ *     <BlockEditor block={block} value={value} onChange={onChange} />
+ *   </div>
+ */
+
+[data-editor-form] [data-field] {
+  margin-bottom: 20px;
+}
+
+[data-editor-form] [data-field] > label {
+  font-size: 16px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+[data-editor-form] [data-field] > input,
+[data-editor-form] [data-field] > textarea,
+[data-editor-form] [data-field] > select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+[data-editor-form] [data-field] > input:focus,
+[data-editor-form] [data-field] > textarea:focus,
+[data-editor-form] [data-field] > select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+[data-editor-form] [data-field] > textarea {
+  resize: vertical;
+}
+
+/* Checkbox: input is nested inside label, not a sibling */
+[data-editor-form] [data-field] > label > input[type='checkbox'] {
+  width: auto;
+  margin-right: 4px;
+}
+
+[data-editor-form] [data-field]:has(> label > input[type='checkbox']) > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}

@@ -1,0 +1,85 @@
+/*
+ * Example styles for PreviewFrame from @verevoir/editor.
+ *
+ * Import this file to get a sensible default appearance:
+ *   import '@verevoir/editor/styles/preview-frame.css';
+ *
+ * Or copy and adapt these styles in your own CSS.
+ * All selectors use data attributes — no class names needed.
+ */
+
+[data-preview-frame] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[data-preview-bar] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+[data-preview-btn] {
+  padding: 4px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition:
+    background 150ms,
+    color 150ms,
+    border-color 150ms;
+}
+
+[data-preview-btn]:hover {
+  background: #f3f4f6;
+}
+
+[data-preview-btn][data-active] {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+[data-preview-btn][data-active]:hover {
+  background: #1d4ed8;
+}
+
+[data-preview-zoom-label] {
+  margin-left: auto;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+[data-preview-zoom-slider] {
+  width: 100px;
+}
+
+[data-preview-viewport] {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  min-height: 400px;
+}
+
+[data-preview-surface] {
+  background: #fff;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  padding: 32px 24px;
+  transition: width 200ms;
+}

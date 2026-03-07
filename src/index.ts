@@ -44,6 +44,9 @@ export {
   carouselControl,
 } from './controls/index.js';
 
+// Publishing
+export { publishFields, isLive } from './publishing.js';
+
 // Utilities
 export { unwrapSchema, inferUIHint } from './utils.js';
 

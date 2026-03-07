@@ -60,14 +60,22 @@ export function PreviewFrame({
 
       <div data-preview-viewport="">
         <div
-          data-preview-surface=""
           style={{
-            width: viewport.width,
-            transform: `scale(${scale})`,
-            transformOrigin: 'top center',
+            width: viewport.width * scale,
+            overflow: 'hidden',
+            flexShrink: 0,
           }}
         >
-          {children}
+          <div
+            data-preview-surface=""
+            style={{
+              width: viewport.width,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+            }}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>

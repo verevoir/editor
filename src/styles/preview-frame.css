@@ -67,7 +67,7 @@
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  overflow: auto;
+  overflow: hidden;
   padding: 24px;
   display: flex;
   justify-content: center;

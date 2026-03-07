@@ -186,7 +186,7 @@ describe('RichTextField', () => {
     const anchor = document.createElement('a');
     anchor.href = 'https://example.com';
     anchor.textContent = 'linked';
-    const sel = window.getSelection();
+    void anchor;
     // Open link dialog
     fireEvent.click(screen.getByTitle('Link (Ctrl+K)'));
     // The Remove button should appear when currentUrl is detected

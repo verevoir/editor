@@ -1,6 +1,6 @@
 {
   "name": "@verevoir/editor",
-  "version": "0.3.5-alpha.1",
+  "version": "0.3.5-beta.1",
   "license": "MIT",
   "description": "Lightweight React content editing components driven by NextLake schema definitions",
   "type": "module",
@@ -31,7 +31,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@verevoir/schema": "0.3.1-alpha.1"
+    "@verevoir/schema": "0.3.1-beta.1"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -39,22 +39,22 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.3",
-    "@testing-library/jest-dom": "^6.0.0",
-    "@testing-library/react": "^16.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^9.39.3",
+    "@eslint/js": "^9.39.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "jsdom": "^25.0.0",
+    "jsdom": "^25.0.1",
     "prettier": "^3.8.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5.7.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
-    "vitest": "^3.0.0",
-    "zod": "^3.24.0"
+    "vitest": "^3.2.4",
+    "zod": "^3.25.76"
   }
 }

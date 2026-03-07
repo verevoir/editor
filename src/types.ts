@@ -14,6 +14,8 @@ export interface FieldEditorProps<T = unknown> {
   field: FieldDefinition;
   value: T;
   onChange: FieldChangeHandler<T>;
+  /** All sibling field values from the parent block (provided by BlockEditor) */
+  blockValue?: Record<string, unknown>;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

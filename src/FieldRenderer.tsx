@@ -35,6 +35,7 @@ export function FieldRenderer({
   value,
   onChange,
   overrides,
+  blockValue,
 }: FieldRendererProps) {
   /* eslint-disable react-hooks/static-components */
   const Component = resolveComponent(name, field.meta.ui, overrides);
@@ -44,7 +45,13 @@ export function FieldRenderer({
   }
 
   return (
-    <Component name={name} field={field} value={value} onChange={onChange} />
+    <Component
+      name={name}
+      field={field}
+      value={value}
+      onChange={onChange}
+      blockValue={blockValue}
+    />
   );
   /* eslint-enable react-hooks/static-components */
 }

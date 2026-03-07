@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FieldEditorProps } from '../types.js';
 import { useRichText } from '../hooks/useRichText.js';
 import { useLinkSearch } from '../LinkSearchContext.js';
+import { useCopyAssist } from '../CopyAssistContext.js';
 import type { LinkSearchResult } from '../LinkSearchContext.js';
 
 export function RichTextField({
@@ -9,11 +10,43 @@ export function RichTextField({
   field,
   value,
   onChange,
+  blockValue,
 }: FieldEditorProps<string>) {
   const { editorRef, handlers, actions, state } = useRichText(
     value ?? '',
     onChange,
   );
+  const generate = useCopyAssist();
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+
+  const handleSuggest = async () => {
+    if (!generate) return;
+    setGenerating(true);
+    try {
+      const result = await generate({
+        fieldName: name,
+        fieldLabel: field.meta.label,
+        hint: 'hint' in field.meta ? (field.meta.hint as string) : undefined,
+        currentValue: value ?? '',
+        context: blockValue ?? {},
+      });
+      setSuggestion(result);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAccept = () => {
+    if (suggestion !== null) {
+      onChange(suggestion);
+      setSuggestion(null);
+    }
+  };
+
+  const handleDismiss = () => {
+    setSuggestion(null);
+  };
 
   return (
     <div data-field={name}>
@@ -80,6 +113,20 @@ export function RichTextField({
           >
             &#128279;
           </button>
+          {generate && (
+            <>
+              <span data-rich-text-separator />
+              <button
+                type="button"
+                onClick={handleSuggest}
+                title="Suggest copy"
+                disabled={generating}
+                data-copy-assist-btn=""
+              >
+                {generating ? '...' : '✦'}
+              </button>
+            </>
+          )}
         </div>
         <div
           ref={editorRef}
@@ -91,6 +138,15 @@ export function RichTextField({
           {...handlers}
         />
       </div>
+      {suggestion !== null && (
+        <SuggestionPanel
+          suggestion={suggestion}
+          onAccept={handleAccept}
+          onRegenerate={handleSuggest}
+          onDismiss={handleDismiss}
+          generating={generating}
+        />
+      )}
       {state.showLinkDialog && (
         <LinkDialog
           currentUrl={state.getActiveLink()}
@@ -99,6 +155,41 @@ export function RichTextField({
           onCancel={actions.closeLinkDialog}
         />
       )}
+    </div>
+  );
+}
+
+// --- Suggestion Panel ---
+
+interface SuggestionPanelProps {
+  suggestion: string;
+  onAccept: () => void;
+  onRegenerate: () => void;
+  onDismiss: () => void;
+  generating: boolean;
+}
+
+function SuggestionPanel({
+  suggestion,
+  onAccept,
+  onRegenerate,
+  onDismiss,
+  generating,
+}: SuggestionPanelProps) {
+  return (
+    <div data-copy-assist-panel="">
+      <div data-copy-assist-preview="">{suggestion}</div>
+      <div data-copy-assist-actions="">
+        <button type="button" onClick={onAccept} disabled={generating}>
+          Accept
+        </button>
+        <button type="button" onClick={onRegenerate} disabled={generating}>
+          {generating ? 'Generating...' : 'Regenerate'}
+        </button>
+        <button type="button" onClick={onDismiss}>
+          Dismiss
+        </button>
+      </div>
     </div>
   );
 }

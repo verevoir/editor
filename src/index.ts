@@ -21,6 +21,9 @@ export {
 // Link search context
 export { LinkSearchProvider, useLinkSearch } from './LinkSearchContext.js';
 
+// Copy assist context
+export { CopyAssistProvider, useCopyAssist } from './CopyAssistContext.js';
+
 // Hooks
 export { useBlockForm } from './hooks/useBlockForm.js';
 export { useRichText } from './hooks/useRichText.js';
@@ -76,6 +79,12 @@ export type {
   LinkSearchFn,
   LinkSearchProviderProps,
 } from './LinkSearchContext.js';
+
+export type {
+  CopyAssistRequest,
+  CopyAssistFn,
+  CopyAssistProviderProps,
+} from './CopyAssistContext.js';
 
 export type { Viewport, PreviewFrameProps } from './PreviewFrame.js';
 

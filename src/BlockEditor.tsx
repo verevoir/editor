@@ -26,6 +26,7 @@ export function BlockEditor({
           value={value[fieldName]}
           onChange={(v) => handleFieldChange(fieldName, v)}
           overrides={overrides}
+          blockValue={value}
         />
       ))}
     </div>

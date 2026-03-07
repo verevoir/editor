@@ -20,6 +20,8 @@ import { ObjectField } from '../src/fields/ObjectField.js';
 import { ReferenceField } from '../src/fields/ReferenceField.js';
 import { ReferenceOptionsProvider } from '../src/ReferenceOptionsContext.js';
 import { LinkSearchProvider } from '../src/LinkSearchContext.js';
+import { CopyAssistProvider } from '../src/CopyAssistContext.js';
+import type { CopyAssistRequest } from '../src/CopyAssistContext.js';
 
 describe('TextField', () => {
   it('renders a text input with label', () => {
@@ -189,6 +191,138 @@ describe('RichTextField', () => {
     fireEvent.click(screen.getByTitle('Link (Ctrl+K)'));
     // The Remove button should appear when currentUrl is detected
     // (dialog receives currentUrl from getActiveLink)
+  });
+
+  it('shows suggest button when CopyAssistProvider is present', () => {
+    const field = richText('Body');
+    const generate = vi.fn().mockResolvedValue('Suggested text');
+    render(
+      <CopyAssistProvider generate={generate}>
+        <RichTextField
+          name="body"
+          field={field}
+          value=""
+          onChange={() => {}}
+        />
+      </CopyAssistProvider>,
+    );
+    expect(screen.getByTitle('Suggest copy')).toBeInTheDocument();
+  });
+
+  it('does not show suggest button without CopyAssistProvider', () => {
+    const field = richText('Body');
+    render(
+      <RichTextField
+        name="body"
+        field={field}
+        value=""
+        onChange={() => {}}
+      />,
+    );
+    expect(screen.queryByTitle('Suggest copy')).not.toBeInTheDocument();
+  });
+
+  it('calls generate with field metadata and shows suggestion panel', async () => {
+    const base = richText('Bio');
+    // Simulate .hint() by constructing with hint in meta (schema engine adds this via .hint())
+    const field = { schema: base.schema, meta: { ...base.meta, hint: 'Third person, 2-3 sentences' } };
+    const generate = vi.fn().mockResolvedValue('A suggested bio.');
+    render(
+      <CopyAssistProvider generate={generate}>
+        <RichTextField
+          name="bio"
+          field={field}
+          value="Existing bio"
+          onChange={() => {}}
+          blockValue={{ name: 'Alice', bio: 'Existing bio' }}
+        />
+      </CopyAssistProvider>,
+    );
+    fireEvent.click(screen.getByTitle('Suggest copy'));
+    // Wait for the async generate call
+    await vi.waitFor(() => {
+      expect(screen.getByText('A suggested bio.')).toBeInTheDocument();
+    });
+    expect(generate).toHaveBeenCalledWith({
+      fieldName: 'bio',
+      fieldLabel: 'Bio',
+      hint: 'Third person, 2-3 sentences',
+      currentValue: 'Existing bio',
+      context: { name: 'Alice', bio: 'Existing bio' },
+    } satisfies CopyAssistRequest);
+  });
+
+  it('accept replaces the value and closes the panel', async () => {
+    const field = richText('Bio');
+    const onChange = vi.fn();
+    const generate = vi.fn().mockResolvedValue('New suggestion');
+    render(
+      <CopyAssistProvider generate={generate}>
+        <RichTextField
+          name="bio"
+          field={field}
+          value="Old value"
+          onChange={onChange}
+        />
+      </CopyAssistProvider>,
+    );
+    fireEvent.click(screen.getByTitle('Suggest copy'));
+    await vi.waitFor(() => {
+      expect(screen.getByText('New suggestion')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Accept'));
+    expect(onChange).toHaveBeenCalledWith('New suggestion');
+    expect(screen.queryByText('New suggestion')).not.toBeInTheDocument();
+  });
+
+  it('dismiss closes the panel without changing value', async () => {
+    const field = richText('Bio');
+    const onChange = vi.fn();
+    const generate = vi.fn().mockResolvedValue('Suggestion');
+    render(
+      <CopyAssistProvider generate={generate}>
+        <RichTextField
+          name="bio"
+          field={field}
+          value="Keep this"
+          onChange={onChange}
+        />
+      </CopyAssistProvider>,
+    );
+    fireEvent.click(screen.getByTitle('Suggest copy'));
+    await vi.waitFor(() => {
+      expect(screen.getByText('Suggestion')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Dismiss'));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByText('Suggestion')).not.toBeInTheDocument();
+  });
+
+  it('regenerate fetches a new suggestion', async () => {
+    const field = richText('Bio');
+    const generate = vi
+      .fn()
+      .mockResolvedValueOnce('First suggestion')
+      .mockResolvedValueOnce('Second suggestion');
+    render(
+      <CopyAssistProvider generate={generate}>
+        <RichTextField
+          name="bio"
+          field={field}
+          value=""
+          onChange={() => {}}
+        />
+      </CopyAssistProvider>,
+    );
+    fireEvent.click(screen.getByTitle('Suggest copy'));
+    await vi.waitFor(() => {
+      expect(screen.getByText('First suggestion')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Regenerate'));
+    await vi.waitFor(() => {
+      expect(screen.getByText('Second suggestion')).toBeInTheDocument();
+    });
+    expect(generate).toHaveBeenCalledTimes(2);
   });
 });
 

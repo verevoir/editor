@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 export interface LinkSearchResult {
   id: string;
+  url: string;
   title: string;
   blockType: string;
 }

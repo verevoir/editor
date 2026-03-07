@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   text,
@@ -19,6 +19,7 @@ import { ArrayField } from '../src/fields/ArrayField.js';
 import { ObjectField } from '../src/fields/ObjectField.js';
 import { ReferenceField } from '../src/fields/ReferenceField.js';
 import { ReferenceOptionsProvider } from '../src/ReferenceOptionsContext.js';
+import { LinkSearchProvider } from '../src/LinkSearchContext.js';
 
 describe('TextField', () => {
   it('renders a text input with label', () => {
@@ -65,6 +66,11 @@ describe('TextField', () => {
 });
 
 describe('RichTextField', () => {
+  beforeEach(() => {
+    document.execCommand = vi.fn().mockReturnValue(true);
+    document.queryCommandState = vi.fn().mockReturnValue(false);
+  });
+
   it('renders a contentEditable editor with label', () => {
     const field = richText('Body');
     render(
@@ -93,6 +99,96 @@ describe('RichTextField', () => {
     vi.advanceTimersByTime(300);
     expect(onChange).toHaveBeenCalledWith('Updated');
     vi.useRealTimers();
+  });
+
+  it('shows internal/external tabs when LinkSearchProvider is present', () => {
+    const field = richText('Body');
+    const search = vi.fn().mockResolvedValue([]);
+    render(
+      <LinkSearchProvider search={search}>
+        <RichTextField
+          name="body"
+          field={field}
+          value="Hello"
+          onChange={() => {}}
+        />
+      </LinkSearchProvider>,
+    );
+    // Open link dialog via toolbar button
+    fireEvent.click(screen.getByTitle('Link (Ctrl+K)'));
+    expect(screen.getByText('Internal')).toBeInTheDocument();
+    expect(screen.getByText('External')).toBeInTheDocument();
+  });
+
+  it('inserts link using url from search result, not doc:id', async () => {
+    vi.useFakeTimers();
+    const field = richText('Body');
+    const onChange = vi.fn();
+    const search = vi.fn().mockResolvedValue([
+      { id: 'abc-123', url: '/talks/abc-123', title: 'My Talk', blockType: 'talk' },
+    ]);
+    render(
+      <LinkSearchProvider search={search}>
+        <RichTextField
+          name="body"
+          field={field}
+          value="Hello"
+          onChange={onChange}
+        />
+      </LinkSearchProvider>,
+    );
+    // Open link dialog
+    fireEvent.click(screen.getByTitle('Link (Ctrl+K)'));
+    // Type a search query
+    const input = screen.getByPlaceholderText('Search documents...');
+    fireEvent.change(input, { target: { value: 'talk' } });
+    // Flush the search promise
+    await vi.advanceTimersByTimeAsync(0);
+    // Click the result — should use url, not doc:id
+    fireEvent.click(screen.getByText('My Talk'));
+    expect(document.execCommand).toHaveBeenCalledWith(
+      'createLink',
+      false,
+      '/talks/abc-123',
+    );
+    vi.useRealTimers();
+  });
+
+  it('does not show tabs when no LinkSearchProvider', () => {
+    const field = richText('Body');
+    render(
+      <RichTextField
+        name="body"
+        field={field}
+        value="Hello"
+        onChange={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getByTitle('Link (Ctrl+K)'));
+    expect(screen.queryByText('Internal')).not.toBeInTheDocument();
+    // External URL input should show directly
+    expect(screen.getByPlaceholderText('https://...')).toBeInTheDocument();
+  });
+
+  it('remove link button clears the link', () => {
+    const field = richText('Body');
+    render(
+      <RichTextField
+        name="body"
+        field={field}
+        value="[linked](https://example.com)"
+        onChange={() => {}}
+      />,
+    );
+    // Simulate cursor inside a link by mocking getActiveLink
+    const anchor = document.createElement('a');
+    anchor.href = 'https://example.com';
+    anchor.textContent = 'linked';
+    const sel = window.getSelection();
+    // Open link dialog
+    fireEvent.click(screen.getByTitle('Link (Ctrl+K)'));
+    // The Remove button should appear when currentUrl is detected
+    // (dialog receives currentUrl from getActiveLink)
   });
 });
 

@@ -202,7 +202,7 @@ function LinkDialog({
                 <button
                   key={r.id}
                   type="button"
-                  onClick={() => onConfirm(`doc:${r.id}`)}
+                  onClick={() => onConfirm(r.url)}
                 >
                   <span>{r.title}</span>
                   <span data-rich-text-link-type>{r.blockType}</span>

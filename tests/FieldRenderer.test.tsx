@@ -30,7 +30,10 @@ describe('FieldRenderer', () => {
     render(
       <FieldRenderer name="body" field={field} value="" onChange={() => {}} />,
     );
-    expect(screen.getByLabelText('Body').tagName).toBe('TEXTAREA');
+    expect(screen.getByRole('textbox', { name: 'Body' })).toHaveAttribute(
+      'contenteditable',
+      'true',
+    );
   });
 
   it('renders NumberField for number UIHint', () => {

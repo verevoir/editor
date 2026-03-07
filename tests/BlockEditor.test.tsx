@@ -41,7 +41,9 @@ describe('BlockEditor', () => {
     render(<BlockEditor block={hero} value={heroData} onChange={() => {}} />);
     expect(screen.getByLabelText('Title')).toHaveValue('Welcome');
     expect(screen.getByLabelText('Subtitle')).toHaveValue('Hello world');
-    expect(screen.getByLabelText('Body')).toHaveValue('<p>Content</p>');
+    expect(screen.getByRole('textbox', { name: 'Body' })).toHaveTextContent(
+      '<p>Content</p>',
+    );
     expect(screen.getByLabelText('Order')).toHaveValue(1);
     expect(screen.getByLabelText('Visible')).toBeChecked();
     expect(screen.getByLabelText('Status')).toHaveValue('draft');
@@ -66,7 +68,10 @@ describe('BlockEditor', () => {
   it('renders correct input types for each UIHint', () => {
     render(<BlockEditor block={hero} value={heroData} onChange={() => {}} />);
     expect(screen.getByLabelText('Title')).toHaveAttribute('type', 'text');
-    expect(screen.getByLabelText('Body').tagName).toBe('TEXTAREA');
+    expect(screen.getByRole('textbox', { name: 'Body' })).toHaveAttribute(
+      'contenteditable',
+      'true',
+    );
     expect(screen.getByLabelText('Order')).toHaveAttribute('type', 'number');
     expect(screen.getByLabelText('Visible')).toHaveAttribute(
       'type',

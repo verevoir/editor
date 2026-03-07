@@ -18,11 +18,18 @@ export {
   useReferenceOptions,
 } from './ReferenceOptionsContext.js';
 
+// Link search context
+export { LinkSearchProvider, useLinkSearch } from './LinkSearchContext.js';
+
 // Hooks
 export { useBlockForm } from './hooks/useBlockForm.js';
+export { useRichText } from './hooks/useRichText.js';
 
 // Preview
 export { PreviewFrame } from './PreviewFrame.js';
+
+// Markdown utilities
+export { markdownToHtml, htmlToMarkdown } from './markdown.js';
 
 // Utilities
 export { unwrapSchema, inferUIHint } from './utils.js';
@@ -38,9 +45,20 @@ export type {
 export type { FieldRendererProps } from './FieldRenderer.js';
 export type { BlockFormState, BlockFormActions } from './hooks/useBlockForm.js';
 export type {
+  RichTextActions,
+  RichTextState,
+  RichTextHandlers,
+} from './hooks/useRichText.js';
+export type {
   ReferenceOption,
   ReferenceOptionsMap,
   ReferenceOptionsProviderProps,
 } from './ReferenceOptionsContext.js';
+
+export type {
+  LinkSearchResult,
+  LinkSearchFn,
+  LinkSearchProviderProps,
+} from './LinkSearchContext.js';
 
 export type { Viewport, PreviewFrameProps } from './PreviewFrame.js';

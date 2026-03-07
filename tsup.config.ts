@@ -14,5 +14,6 @@ export default defineConfig({
       'dist/styles/preview-frame.css',
     );
     copyFileSync('src/styles/editor-form.css', 'dist/styles/editor-form.css');
+    copyFileSync('src/styles/rich-text.css', 'dist/styles/rich-text.css');
   },
 });

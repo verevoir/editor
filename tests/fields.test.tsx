@@ -65,7 +65,7 @@ describe('TextField', () => {
 });
 
 describe('RichTextField', () => {
-  it('renders a textarea with label', () => {
+  it('renders a contentEditable editor with label', () => {
     const field = richText('Body');
     render(
       <RichTextField
@@ -75,20 +75,24 @@ describe('RichTextField', () => {
         onChange={() => {}}
       />,
     );
-    expect(screen.getByLabelText('Body')).toHaveValue('Content');
-    expect(screen.getByLabelText('Body').tagName).toBe('TEXTAREA');
+    const el = screen.getByRole('textbox', { name: 'Body' });
+    expect(el).toHaveAttribute('contenteditable', 'true');
+    expect(el).toHaveTextContent('Content');
   });
 
-  it('calls onChange when typing', () => {
+  it('calls onChange on input after debounce', () => {
+    vi.useFakeTimers();
     const onChange = vi.fn();
     const field = richText('Body');
     render(
       <RichTextField name="body" field={field} value="" onChange={onChange} />,
     );
-    fireEvent.change(screen.getByLabelText('Body'), {
-      target: { value: 'Updated' },
-    });
+    const el = screen.getByRole('textbox', { name: 'Body' });
+    el.innerHTML = '<p>Updated</p>';
+    fireEvent.input(el);
+    vi.advanceTimersByTime(300);
     expect(onChange).toHaveBeenCalledWith('Updated');
+    vi.useRealTimers();
   });
 });
 

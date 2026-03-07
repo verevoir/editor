@@ -31,6 +31,19 @@ export { PreviewFrame } from './PreviewFrame.js';
 // Markdown utilities
 export { markdownToHtml, htmlToMarkdown } from './markdown.js';
 
+// Controls
+export {
+  heroBlock,
+  HeroRenderer,
+  heroControl,
+  contentBlock,
+  ContentRenderer,
+  contentControl,
+  carouselBlock,
+  CarouselRenderer,
+  carouselControl,
+} from './controls/index.js';
+
 // Utilities
 export { unwrapSchema, inferUIHint } from './utils.js';
 
@@ -62,3 +75,12 @@ export type {
 } from './LinkSearchContext.js';
 
 export type { Viewport, PreviewFrameProps } from './PreviewFrame.js';
+
+export type {
+  ControlDefinition,
+  ContentBlock,
+  HeroData,
+  ContentData,
+  CarouselData,
+  CarouselSlide,
+} from './controls/index.js';

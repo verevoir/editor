@@ -2,7 +2,7 @@
   "name": "@verevoir/editor",
   "version": "0.3.5-beta.1",
   "license": "MIT",
-  "description": "Lightweight React content editing components driven by NextLake schema definitions",
+  "description": "Lightweight React content editing components driven by Verevoir schema definitions",
   "homepage": "https://verevoir.io",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -18,12 +18,14 @@
   },
   "files": [
     "dist",
-    "dist/styles"
+    "dist/styles",
+    "llms.txt"
   ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com:verevoir/editor.git"
   },
+  "funding": "https://buymeacoffee.com/verevoir",
   "scripts": {
     "prepare": "npm run build",
     "build": "tsup",

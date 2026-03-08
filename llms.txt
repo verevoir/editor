@@ -1,0 +1,166 @@
+# @verevoir/editor
+
+> React components for content editing. Renders forms from block definitions. Depends on `@verevoir/schema`.
+
+## Install
+
+```bash
+npm install @verevoir/editor
+```
+
+Peer dependencies: `react`, `react-dom`.
+
+## Core Components
+
+### BlockEditor
+
+Renders a complete editing form from a block definition. Reads field metadata (labels, types, validation) to select appropriate input components.
+
+```tsx
+import { BlockEditor, useBlockForm } from '@verevoir/editor';
+import { article } from './blocks';
+
+function ArticleEditor({ value, onChange }) {
+  const [state, actions] = useBlockForm(article, value, onChange);
+  return <BlockEditor block={article} state={state} actions={actions} />;
+}
+```
+
+### useBlockForm(block, value, onChange)
+
+Hook that returns `[state, actions]` for form state management. Handles nested updates for objects and arrays.
+
+### Field Components
+
+Individual field editors, rendered automatically by BlockEditor but also usable standalone:
+
+- `TextField` — single-line input
+- `RichTextField` — rich text editor (HTML)
+- `NumberField` — numeric input
+- `BooleanField` — checkbox
+- `SelectField` — dropdown
+- `ArrayField` — list with add/remove/reorder
+- `ObjectField` — nested fieldset
+- `ReferenceField` — select dropdown from provided options
+
+## Context Providers
+
+### ReferenceOptionsProvider
+
+Provides options for `ReferenceField` dropdowns.
+
+```tsx
+<ReferenceOptionsProvider options={{ author: [{ id: '1', label: 'Alice' }] }}>
+  <BlockEditor ... />
+</ReferenceOptionsProvider>
+```
+
+### LinkSearchProvider
+
+Async search for internal document linking in RichTextField.
+
+```tsx
+<LinkSearchProvider onSearch={async (query) => results}>
+  <BlockEditor ... />
+</LinkSearchProvider>
+```
+
+`LinkSearchResult`: `{ id: string; url: string; title: string; blockType: string }`
+
+### CopyAssistProvider
+
+AI-powered copy generation for rich text fields. When provided, RichTextField shows a suggest button.
+
+```tsx
+<CopyAssistProvider onGenerate={async (request) => htmlString}>
+  <BlockEditor ... />
+</CopyAssistProvider>
+```
+
+`CopyAssistRequest`: `{ fieldName, fieldLabel, hint, currentValue, context }`
+
+## Publishing
+
+### publishFields()
+
+Returns shared status/publishFrom/publishTo field definitions for any block.
+
+```typescript
+import { publishFields } from '@verevoir/editor';
+
+const page = defineBlock({
+  name: 'page',
+  fields: {
+    title: text('Title'),
+    ...publishFields(),
+  },
+});
+```
+
+### isLive(data, now?)
+
+Checks if content is visible: `status === 'published'` and within the optional time window.
+
+## Content Controls
+
+Pre-built polymorphic content blocks for page builders:
+
+- `heroControl` — hero section with heading, subheading, CTA
+- `contentControl` — rich text content block
+- `carouselControl` — image carousel
+
+Each has a `ControlDefinition` with `type`, `label`, `block`, and `Renderer`.
+
+## PreviewFrame
+
+Viewport-switching preview component with zoom support.
+
+```tsx
+import { PreviewFrame } from '@verevoir/editor';
+
+<PreviewFrame src={previewUrl} />
+```
+
+## Styling
+
+Optional CSS shipped via subpath export `@verevoir/editor/styles/*`. Components use `data-block`, `data-field`, `data-array-item` attributes for styling.
+
+## Utilities
+
+- `markdownToHtml(markdown)` — convert markdown to HTML
+- `htmlToMarkdown(html)` — convert HTML to markdown
+- `unwrapSchema(field)` — extract Zod schema from field definition
+- `inferUIHint(field)` — determine UI hint from field type
+
+## SSR / Server Component Warning
+
+**DO NOT import `@verevoir/editor` in Next.js server components, server actions, or any server-side code.** The package has `createContext()` calls at module scope that fail outside a browser React environment with `createContext is not a function`.
+
+This affects `publishFields` and `isLive` — even though they don't use React, importing them pulls in the full module.
+
+**Fix:** Copy `publishFields` and `isLive` into a local file that only imports from `@verevoir/schema`:
+
+```typescript
+// lib/publishing.ts (server-safe)
+import { select, text } from '@verevoir/schema';
+
+export function publishFields() {
+  return {
+    status: select('Status', ['draft', 'published', 'archived']).default('draft'),
+    publishFrom: text('Publish From').optional(),
+    publishTo: text('Publish To').optional(),
+  };
+}
+
+export function isLive(
+  data: { status?: unknown; publishFrom?: unknown; publishTo?: unknown },
+  now: Date = new Date(),
+): boolean {
+  if (data.status !== 'published') return false;
+  if (data.publishFrom && new Date(String(data.publishFrom)) > now) return false;
+  if (data.publishTo && new Date(String(data.publishTo)) < now) return false;
+  return true;
+}
+```
+
+Only import `@verevoir/editor` in `'use client'` components.

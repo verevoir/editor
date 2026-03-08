@@ -84,28 +84,19 @@ describe('isLive', () => {
 
   it('returns false when publishFrom is in the future (embargoed)', () => {
     expect(
-      isLive(
-        { status: 'published', publishFrom: '2025-07-01T00:00:00Z' },
-        now,
-      ),
+      isLive({ status: 'published', publishFrom: '2025-07-01T00:00:00Z' }, now),
     ).toBe(false);
   });
 
   it('returns true when publishFrom is in the past', () => {
     expect(
-      isLive(
-        { status: 'published', publishFrom: '2025-01-01T00:00:00Z' },
-        now,
-      ),
+      isLive({ status: 'published', publishFrom: '2025-01-01T00:00:00Z' }, now),
     ).toBe(true);
   });
 
   it('returns true when publishFrom equals now', () => {
     expect(
-      isLive(
-        { status: 'published', publishFrom: '2025-06-15T12:00:00Z' },
-        now,
-      ),
+      isLive({ status: 'published', publishFrom: '2025-06-15T12:00:00Z' }, now),
     ).toBe(true);
   });
 
@@ -113,28 +104,19 @@ describe('isLive', () => {
 
   it('returns false when publishTo is in the past (expired)', () => {
     expect(
-      isLive(
-        { status: 'published', publishTo: '2025-01-01T00:00:00Z' },
-        now,
-      ),
+      isLive({ status: 'published', publishTo: '2025-01-01T00:00:00Z' }, now),
     ).toBe(false);
   });
 
   it('returns true when publishTo is in the future', () => {
     expect(
-      isLive(
-        { status: 'published', publishTo: '2025-12-31T23:59:59Z' },
-        now,
-      ),
+      isLive({ status: 'published', publishTo: '2025-12-31T23:59:59Z' }, now),
     ).toBe(true);
   });
 
   it('returns true when publishTo equals now', () => {
     expect(
-      isLive(
-        { status: 'published', publishTo: '2025-06-15T12:00:00Z' },
-        now,
-      ),
+      isLive({ status: 'published', publishTo: '2025-06-15T12:00:00Z' }, now),
     ).toBe(true);
   });
 

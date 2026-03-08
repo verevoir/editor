@@ -127,7 +127,12 @@ describe('RichTextField', () => {
     const field = richText('Body');
     const onChange = vi.fn();
     const search = vi.fn().mockResolvedValue([
-      { id: 'abc-123', url: '/talks/abc-123', title: 'My Talk', blockType: 'talk' },
+      {
+        id: 'abc-123',
+        url: '/talks/abc-123',
+        title: 'My Talk',
+        blockType: 'talk',
+      },
     ]);
     render(
       <LinkSearchProvider search={search}>
@@ -198,12 +203,7 @@ describe('RichTextField', () => {
     const generate = vi.fn().mockResolvedValue('Suggested text');
     render(
       <CopyAssistProvider generate={generate}>
-        <RichTextField
-          name="body"
-          field={field}
-          value=""
-          onChange={() => {}}
-        />
+        <RichTextField name="body" field={field} value="" onChange={() => {}} />
       </CopyAssistProvider>,
     );
     expect(screen.getByTitle('Suggest copy')).toBeInTheDocument();
@@ -212,12 +212,7 @@ describe('RichTextField', () => {
   it('does not show suggest button without CopyAssistProvider', () => {
     const field = richText('Body');
     render(
-      <RichTextField
-        name="body"
-        field={field}
-        value=""
-        onChange={() => {}}
-      />,
+      <RichTextField name="body" field={field} value="" onChange={() => {}} />,
     );
     expect(screen.queryByTitle('Suggest copy')).not.toBeInTheDocument();
   });
@@ -225,7 +220,10 @@ describe('RichTextField', () => {
   it('calls generate with field metadata and shows suggestion panel', async () => {
     const base = richText('Bio');
     // Simulate .hint() by constructing with hint in meta (schema engine adds this via .hint())
-    const field = { schema: base.schema, meta: { ...base.meta, hint: 'Third person, 2-3 sentences' } };
+    const field = {
+      schema: base.schema,
+      meta: { ...base.meta, hint: 'Third person, 2-3 sentences' },
+    };
     const generate = vi.fn().mockResolvedValue('A suggested bio.');
     render(
       <CopyAssistProvider generate={generate}>
@@ -306,12 +304,7 @@ describe('RichTextField', () => {
       .mockResolvedValueOnce('Second suggestion');
     render(
       <CopyAssistProvider generate={generate}>
-        <RichTextField
-          name="bio"
-          field={field}
-          value=""
-          onChange={() => {}}
-        />
+        <RichTextField name="bio" field={field} value="" onChange={() => {}} />
       </CopyAssistProvider>,
     );
     fireEvent.click(screen.getByTitle('Suggest copy'));

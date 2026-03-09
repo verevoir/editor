@@ -107,6 +107,12 @@ For `editor-form.css`, wrap your `BlockEditor` in a container with `data-editor-
 - **Zod introspection** — SelectField reads `ZodEnum.options`, ArrayField reads `ZodArray.element`, ObjectField reads `ZodObject.shape`.
 - **No `<form>` tag** — the developer controls form submission, styling, and layout.
 
+## Documentation
+
+- [Getting Started](https://verevoir.io/docs/getting-started) — content model, storage, and editor in five minutes
+- [Content Controls](https://verevoir.io/docs/content-controls) — polymorphic content blocks for page builders
+- [Integration Guide](https://verevoir.io/docs/integration) — connecting content models, storage, editor, and more
+
 ## Development
 
 ```bash

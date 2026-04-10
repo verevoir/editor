@@ -9,8 +9,12 @@ export { NumberField } from './fields/NumberField.js';
 export { BooleanField } from './fields/BooleanField.js';
 export { SelectField } from './fields/SelectField.js';
 export { ArrayField } from './fields/ArrayField.js';
+export { ChipsArrayField } from './fields/ChipsArrayField.js';
+export { TableArrayField } from './fields/TableArrayField.js';
+export { DrilldownArrayField } from './fields/DrilldownArrayField.js';
 export { ObjectField } from './fields/ObjectField.js';
 export { ReferenceField } from './fields/ReferenceField.js';
+export { LinkField } from './fields/LinkField.js';
 
 // Reference context
 export {

@@ -57,7 +57,8 @@ function pickArrayComponent(props: FieldEditorProps<unknown[]>) {
           ui === 'number' ||
           ui === 'boolean' ||
           ui === 'select' ||
-          ui === 'reference'
+          ui === 'reference' ||
+          ui === 'link'
         );
       });
       if (allSimple) return TableArrayField;

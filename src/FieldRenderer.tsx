@@ -7,6 +7,7 @@ import { SelectField } from './fields/SelectField.js';
 import { ArrayField } from './fields/ArrayField.js';
 import { ObjectField } from './fields/ObjectField.js';
 import { ReferenceField } from './fields/ReferenceField.js';
+import { LinkField } from './fields/LinkField.js';
 import type { ComponentType } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +20,7 @@ const builtInFields: Record<string, ComponentType<FieldEditorProps<any>>> = {
   array: ArrayField,
   object: ObjectField,
   reference: ReferenceField,
+  link: LinkField,
 };
 
 export interface FieldRendererProps extends FieldEditorProps {

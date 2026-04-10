@@ -260,3 +260,12 @@
   font-size: 13px;
   color: #9ca3af;
 }
+
+/* Field hints — natural-language guidance attached to a field via .hint() */
+[data-editor-form] [data-field-hint],
+.verevoir-field-hint {
+  margin: 4px 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6b7280;
+}

@@ -28,6 +28,10 @@ export interface FieldRendererProps extends FieldEditorProps {
 /**
  * Resolves the correct field component for a field definition.
  * Resolution order: field-name override > UIHint override > built-in default.
+ *
+ * If the field's metadata includes a `hint`, it is rendered as a small
+ * paragraph after the field component. The hint is wrapped in a
+ * `data-field-hint` element so consumers can style or hide it via CSS.
  */
 export function FieldRenderer({
   name,
@@ -45,13 +49,20 @@ export function FieldRenderer({
   }
 
   return (
-    <Component
-      name={name}
-      field={field}
-      value={value}
-      onChange={onChange}
-      blockValue={blockValue}
-    />
+    <>
+      <Component
+        name={name}
+        field={field}
+        value={value}
+        onChange={onChange}
+        blockValue={blockValue}
+      />
+      {field.meta.hint && (
+        <p className="verevoir-field-hint" data-field-hint={name}>
+          {field.meta.hint}
+        </p>
+      )}
+    </>
   );
   /* eslint-enable react-hooks/static-components */
 }

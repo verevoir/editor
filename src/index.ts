@@ -11,6 +11,7 @@ export { SelectField } from './fields/SelectField.js';
 export { ArrayField } from './fields/ArrayField.js';
 export { ChipsArrayField } from './fields/ChipsArrayField.js';
 export { TableArrayField } from './fields/TableArrayField.js';
+export { CardGridArrayField } from './fields/CardGridArrayField.js';
 export { DrilldownArrayField } from './fields/DrilldownArrayField.js';
 export { ObjectField } from './fields/ObjectField.js';
 export { ReferenceField } from './fields/ReferenceField.js';

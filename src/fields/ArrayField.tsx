@@ -1,9 +1,18 @@
 import type { FieldEditorProps } from '../types.js';
 import { ChipsArrayField } from './ChipsArrayField.js';
 import { TableArrayField } from './TableArrayField.js';
+import { CardGridArrayField } from './CardGridArrayField.js';
 import { DrilldownArrayField } from './DrilldownArrayField.js';
 
 const SCALAR_UI_HINTS = new Set(['text', 'number']);
+const SIMPLE_CELL_HINTS = new Set([
+  'text',
+  'number',
+  'boolean',
+  'select',
+  'reference',
+  'link',
+]);
 const TABLE_MAX_COLUMNS = 4;
 
 /**
@@ -14,6 +23,7 @@ const TABLE_MAX_COLUMNS = 4;
  * 2. Otherwise auto-detects from the item shape:
  *    - scalar items (text, number) → ChipsArrayField
  *    - object items with ≤4 simple fields → TableArrayField
+ *    - object items with more fields, or any non-simple field → CardGridArrayField
  *    - everything else → DrilldownArrayField (the fallback)
  *
  * Each variant is a real field component — this dispatcher just picks
@@ -33,6 +43,7 @@ function pickArrayComponent(props: FieldEditorProps<unknown[]>) {
   // Explicit hint wins
   if (display === 'chips') return ChipsArrayField;
   if (display === 'table') return TableArrayField;
+  if (display === 'cards') return CardGridArrayField;
   if (display === 'drilldown') return DrilldownArrayField;
   // Unknown values silently fall through to auto-detection (forwards
   // compatible with hint values not yet implemented).
@@ -46,23 +57,19 @@ function pickArrayComponent(props: FieldEditorProps<unknown[]>) {
   }
 
   if (itemUi === 'object' && itemMeta?.objectFields) {
-    const columnCount = Object.keys(itemMeta.objectFields).length;
-    if (columnCount > 0 && columnCount <= TABLE_MAX_COLUMNS) {
-      // Only pick the table if every column is a simple input —
-      // nested arrays/objects in a cell would render badly.
-      const allSimple = Object.values(itemMeta.objectFields).every((f) => {
-        const ui = f.meta.ui;
-        return (
-          ui === 'text' ||
-          ui === 'number' ||
-          ui === 'boolean' ||
-          ui === 'select' ||
-          ui === 'reference' ||
-          ui === 'link'
-        );
-      });
-      if (allSimple) return TableArrayField;
+    const fields = Object.values(itemMeta.objectFields);
+    if (fields.length === 0) return DrilldownArrayField;
+
+    const allSimple = fields.every((f) => SIMPLE_CELL_HINTS.has(f.meta.ui));
+
+    if (allSimple && fields.length <= TABLE_MAX_COLUMNS) {
+      return TableArrayField;
     }
+
+    // Object items that don't fit a table — too many fields, or
+    // contain nested arrays/objects/rich-text. Fall through to
+    // cards instead of drilldown — the cards view is friendlier.
+    return CardGridArrayField;
   }
 
   return DrilldownArrayField;

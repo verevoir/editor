@@ -205,8 +205,9 @@ describe('BlockEditor', () => {
     );
 
     expect(screen.getByLabelText('Title')).toHaveValue('My Page');
-    expect(screen.getByDisplayValue('react')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('nextlake')).toBeInTheDocument();
+    // Tags is a string array → ChipsArrayField → chips render as text
+    expect(screen.getByText('react')).toBeInTheDocument();
+    expect(screen.getByText('nextlake')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Alice')).toBeInTheDocument();
     expect(screen.getByDisplayValue('2025')).toBeInTheDocument();
   });

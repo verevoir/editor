@@ -16,6 +16,9 @@ import { NumberField } from '../src/fields/NumberField.js';
 import { BooleanField } from '../src/fields/BooleanField.js';
 import { SelectField } from '../src/fields/SelectField.js';
 import { ArrayField } from '../src/fields/ArrayField.js';
+import { DrilldownArrayField } from '../src/fields/DrilldownArrayField.js';
+import { ChipsArrayField } from '../src/fields/ChipsArrayField.js';
+import { TableArrayField } from '../src/fields/TableArrayField.js';
 import { ObjectField } from '../src/fields/ObjectField.js';
 import { ReferenceField } from '../src/fields/ReferenceField.js';
 import { ReferenceOptionsProvider } from '../src/ReferenceOptionsContext.js';
@@ -421,7 +424,7 @@ describe('ArrayField', () => {
   it('renders items with add and remove buttons', () => {
     const field = array('Tags', text('Tag'));
     render(
-      <ArrayField
+      <DrilldownArrayField
         name="tags"
         field={field}
         value={['foo', 'bar']}
@@ -438,7 +441,7 @@ describe('ArrayField', () => {
     const onChange = vi.fn();
     const field = array('Tags', text('Tag'));
     render(
-      <ArrayField
+      <DrilldownArrayField
         name="tags"
         field={field}
         value={['foo']}
@@ -453,7 +456,7 @@ describe('ArrayField', () => {
     const onChange = vi.fn();
     const field = array('Tags', text('Tag'));
     render(
-      <ArrayField
+      <DrilldownArrayField
         name="tags"
         field={field}
         value={['foo', 'bar']}
@@ -468,7 +471,7 @@ describe('ArrayField', () => {
     const onChange = vi.fn();
     const field = array('Tags', text('Tag'));
     render(
-      <ArrayField
+      <DrilldownArrayField
         name="tags"
         field={field}
         value={['foo', 'bar']}
@@ -484,10 +487,210 @@ describe('ArrayField', () => {
   it('renders empty state with add button', () => {
     const field = array('Tags', text('Tag'));
     render(
-      <ArrayField name="tags" field={field} value={[]} onChange={() => {}} />,
+      <DrilldownArrayField
+        name="tags"
+        field={field}
+        value={[]}
+        onChange={() => {}}
+      />,
     );
     expect(screen.getByText('Add Tags')).toBeInTheDocument();
     expect(screen.queryByText('Remove')).not.toBeInTheDocument();
+  });
+});
+
+describe('ChipsArrayField', () => {
+  it('renders existing values as chips', () => {
+    const field = array('Tags', text('Tag'));
+    render(
+      <ChipsArrayField
+        name="tags"
+        field={field}
+        value={['react', 'astro']}
+        onChange={() => {}}
+      />,
+    );
+    expect(screen.getByText('react')).toBeInTheDocument();
+    expect(screen.getByText('astro')).toBeInTheDocument();
+  });
+
+  it('adds an item when Enter is pressed', () => {
+    const onChange = vi.fn();
+    const field = array('Tags', text('Tag'));
+    render(
+      <ChipsArrayField
+        name="tags"
+        field={field}
+        value={['react']}
+        onChange={onChange}
+      />,
+    );
+    const input = screen.getByPlaceholderText('') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'astro' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onChange).toHaveBeenCalledWith(['react', 'astro']);
+  });
+
+  it('removes the last chip on Backspace when input is empty', () => {
+    const onChange = vi.fn();
+    const field = array('Tags', text('Tag'));
+    render(
+      <ChipsArrayField
+        name="tags"
+        field={field}
+        value={['react', 'astro']}
+        onChange={onChange}
+      />,
+    );
+    const input = screen.getByPlaceholderText('') as HTMLInputElement;
+    fireEvent.keyDown(input, { key: 'Backspace' });
+    expect(onChange).toHaveBeenCalledWith(['react']);
+  });
+
+  it('removes a chip when its × button is clicked', () => {
+    const onChange = vi.fn();
+    const field = array('Tags', text('Tag'));
+    render(
+      <ChipsArrayField
+        name="tags"
+        field={field}
+        value={['react', 'astro']}
+        onChange={onChange}
+      />,
+    );
+    const removeButtons = screen.getAllByLabelText(/Remove/);
+    fireEvent.click(removeButtons[0]);
+    expect(onChange).toHaveBeenCalledWith(['astro']);
+  });
+});
+
+describe('TableArrayField', () => {
+  const buttonsField = array(
+    'Buttons',
+    object('Button', {
+      label: text('Label'),
+      url: text('URL'),
+    }),
+  );
+
+  it('renders one row per item with column inputs', () => {
+    render(
+      <TableArrayField
+        name="buttons"
+        field={buttonsField}
+        value={[
+          { label: 'Sign up', url: '/signup' },
+          { label: 'Learn more', url: '/about' },
+        ]}
+        onChange={() => {}}
+      />,
+    );
+    expect(screen.getByDisplayValue('Sign up')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('/signup')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Learn more')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('/about')).toBeInTheDocument();
+  });
+
+  it('renders column headers from the inner field labels', () => {
+    render(
+      <TableArrayField
+        name="buttons"
+        field={buttonsField}
+        value={[]}
+        onChange={() => {}}
+      />,
+    );
+    expect(
+      screen.getByRole('columnheader', { name: /Label/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('columnheader', { name: /URL/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('emits the updated row when a cell is edited', () => {
+    const onChange = vi.fn();
+    render(
+      <TableArrayField
+        name="buttons"
+        field={buttonsField}
+        value={[{ label: 'Sign up', url: '/signup' }]}
+        onChange={onChange}
+      />,
+    );
+    fireEvent.change(screen.getByDisplayValue('Sign up'), {
+      target: { value: 'Get started' },
+    });
+    expect(onChange).toHaveBeenCalledWith([
+      { label: 'Get started', url: '/signup' },
+    ]);
+  });
+
+  it('adds a new empty row when Add is clicked', () => {
+    const onChange = vi.fn();
+    render(
+      <TableArrayField
+        name="buttons"
+        field={buttonsField}
+        value={[{ label: 'Sign up', url: '/signup' }]}
+        onChange={onChange}
+      />,
+    );
+    fireEvent.click(screen.getByText(/Add Buttons/));
+    expect(onChange).toHaveBeenCalledWith([
+      { label: 'Sign up', url: '/signup' },
+      { label: '', url: '' },
+    ]);
+  });
+});
+
+describe('ArrayField dispatcher', () => {
+  it('dispatches a string array to ChipsArrayField', () => {
+    const field = array('Tags', text('Tag'));
+    const { container } = render(
+      <ArrayField
+        name="tags"
+        field={field}
+        value={['react']}
+        onChange={() => {}}
+      />,
+    );
+    expect(
+      container.querySelector('[data-array-display="chips"]'),
+    ).toBeInTheDocument();
+  });
+
+  it('dispatches a small object array to TableArrayField', () => {
+    const field = array(
+      'Buttons',
+      object('Button', { label: text('Label'), url: text('URL') }),
+    );
+    const { container } = render(
+      <ArrayField
+        name="buttons"
+        field={field}
+        value={[]}
+        onChange={() => {}}
+      />,
+    );
+    expect(
+      container.querySelector('[data-array-display="table"]'),
+    ).toBeInTheDocument();
+  });
+
+  it('respects an explicit display="drilldown" hint', () => {
+    const field = array('Tags', text('Tag')).display('drilldown');
+    const { container } = render(
+      <ArrayField
+        name="tags"
+        field={field}
+        value={['react']}
+        onChange={() => {}}
+      />,
+    );
+    expect(
+      container.querySelector('[data-array-display="drilldown"]'),
+    ).toBeInTheDocument();
   });
 });
 

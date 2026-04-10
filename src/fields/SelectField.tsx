@@ -1,5 +1,10 @@
+import type { z } from 'zod';
 import type { FieldEditorProps } from '../types.js';
 import { unwrapSchema } from '../utils.js';
+
+type ZodInternal = {
+  _zod?: { def?: { type?: string; entries?: Record<string, string> } };
+};
 
 export function SelectField({
   name,
@@ -7,9 +12,10 @@ export function SelectField({
   value,
   onChange,
 }: FieldEditorProps<string>) {
-  const unwrapped = unwrapSchema(field.schema);
+  const unwrapped: z.ZodType = unwrapSchema(field.schema);
+  const def = (unwrapped as unknown as ZodInternal)._zod?.def;
   const options: string[] =
-    unwrapped._def?.typeName === 'ZodEnum' ? unwrapped._def.values : [];
+    def?.type === 'enum' && def.entries ? Object.values(def.entries) : [];
 
   return (
     <div data-field={name}>

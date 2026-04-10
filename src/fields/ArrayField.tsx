@@ -3,6 +3,8 @@ import type { FieldEditorProps } from '../types.js';
 import { unwrapSchema, inferUIHint } from '../utils.js';
 import { FieldRenderer } from '../FieldRenderer.js';
 
+type ZodInternal = { _zod?: { def?: { type?: string; element?: z.ZodType } } };
+
 export function ArrayField({
   name,
   field,
@@ -11,8 +13,9 @@ export function ArrayField({
 }: FieldEditorProps<unknown[]>) {
   const items = value ?? [];
   const unwrapped = unwrapSchema(field.schema);
-  const elementSchema: z.ZodTypeAny | undefined =
-    unwrapped._def?.typeName === 'ZodArray' ? unwrapped._def.type : undefined;
+  const def = (unwrapped as unknown as ZodInternal)._zod?.def;
+  const elementSchema: z.ZodType | undefined =
+    def?.type === 'array' ? def.element : undefined;
   const elementHint = elementSchema ? inferUIHint(elementSchema) : 'text';
 
   const handleItemChange = (index: number, itemValue: unknown) => {
@@ -70,14 +73,14 @@ export function ArrayField({
   );
 }
 
-function getDefault(schema: z.ZodTypeAny | undefined): unknown {
+function getDefault(schema: z.ZodType | undefined): unknown {
   if (!schema) return '';
   const unwrapped = unwrapSchema(schema);
-  const name = unwrapped._def?.typeName ?? '';
-  if (name === 'ZodString') return '';
-  if (name === 'ZodNumber') return 0;
-  if (name === 'ZodBoolean') return false;
-  if (name === 'ZodArray') return [];
-  if (name === 'ZodObject') return {};
+  const name = (unwrapped as unknown as ZodInternal)._zod?.def?.type ?? '';
+  if (name === 'string') return '';
+  if (name === 'number') return 0;
+  if (name === 'boolean') return false;
+  if (name === 'array') return [];
+  if (name === 'object') return {};
   return '';
 }

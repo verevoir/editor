@@ -50,13 +50,66 @@ describe('markdownToHtml', () => {
 
   it('converts links', () => {
     expect(markdownToHtml('[click](https://example.com)')).toBe(
-      '<p><a href="https://example.com">click</a></p>',
+      '<p><a href="https://example.com" rel="noopener noreferrer">click</a></p>',
     );
   });
 
   it('converts internal links', () => {
     expect(markdownToHtml('[Page](doc:abc-123)')).toBe(
-      '<p><a href="doc:abc-123">Page</a></p>',
+      '<p><a href="doc:abc-123" rel="noopener noreferrer">Page</a></p>',
+    );
+  });
+
+  it('rejects javascript: URLs and renders them as plain text', () => {
+    expect(
+      markdownToHtml('[click](javascript:alert(1))'),
+    ).toBe('<p>[click](javascript:alert(1))</p>');
+  });
+
+  it('rejects data: URLs (HTML exfil / phishing vector)', () => {
+    expect(
+      markdownToHtml('[click](data:text/html,<script>alert(1)</script>)'),
+    ).toBe('<p>[click](data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;)</p>');
+  });
+
+  it('rejects vbscript: URLs', () => {
+    expect(markdownToHtml('[click](vbscript:msgbox(1))')).toBe(
+      '<p>[click](vbscript:msgbox(1))</p>',
+    );
+  });
+
+  it('rejects file: URLs', () => {
+    expect(markdownToHtml('[file](file:///etc/passwd)')).toBe(
+      '<p>[file](file:///etc/passwd)</p>',
+    );
+  });
+
+  it('rejects scheme-smuggling via control characters', () => {
+    // `java\tscript:` is treated as `javascript:` by browsers — they
+    // strip tabs and newlines from the scheme before dispatching.
+    expect(markdownToHtml('[click](java\tscript:alert(1))')).toBe(
+      '<p>[click](java\tscript:alert(1))</p>',
+    );
+  });
+
+  it('accepts tel: and mailto:', () => {
+    expect(markdownToHtml('[call](tel:+441234567890)')).toBe(
+      '<p><a href="tel:+441234567890" rel="noopener noreferrer">call</a></p>',
+    );
+    expect(markdownToHtml('[email](mailto:a@b.com)')).toBe(
+      '<p><a href="mailto:a@b.com" rel="noopener noreferrer">email</a></p>',
+    );
+  });
+
+  it('accepts root-relative, protocol-relative, and hash links', () => {
+    expect(markdownToHtml('[home](/home)')).toBe(
+      '<p><a href="/home" rel="noopener noreferrer">home</a></p>',
+    );
+    expect(markdownToHtml('[proto](//cdn.example.com/img.png)')).toBe(
+      '<p><a href="//cdn.example.com/img.png" rel="noopener noreferrer">proto</a></p>',
+    );
+    expect(markdownToHtml('[anchor](#section)')).toBe(
+      '<p><a href="#section" rel="noopener noreferrer">anchor</a></p>',
     );
   });
 

@@ -21,6 +21,31 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;');
 }
 
+/**
+ * URL schemes that `[text](url)` is allowed to emit as a live `<a href>`.
+ * Anything else (javascript:, data:, vbscript:, file:, blob:, filesystem:,
+ * exotic handlers like `intent:` / `tg:` / `slack:`) falls through as plain
+ * escaped text.
+ *
+ * Included schemes:
+ * - `http:` / `https:` — external web links
+ * - `mailto:` / `tel:` — contact affordances
+ * - `doc:` — Verevoir's internal document reference scheme (resolved by
+ *   the renderer, not the browser)
+ * - `//` protocol-relative, `/` root-relative, `#` in-page anchors
+ */
+const SAFE_URL_SCHEMES = /^(?:https?:|mailto:|tel:|doc:|\/\/|\/|#)/i;
+
+function isSafeUrl(url: string): boolean {
+  // Strip control characters (tab, newline, NULL, etc.) that attackers
+  // use to bypass scheme checks — e.g. `java\tscript:alert(1)`. These
+  // get ignored by browsers during URL parsing, so a scheme check that
+  // doesn't normalise them is unsafe.
+  const normalised = url.replace(/[\x00-\x1f\x7f]/g, '').trim();
+  if (normalised === '') return false;
+  return SAFE_URL_SCHEMES.test(normalised);
+}
+
 function processInline(text: string): string {
   let result = escapeHtml(text);
   // Bold: **text** (must be before italic)
@@ -29,9 +54,19 @@ function processInline(text: string): string {
   result = result.replace(/\*(.+?)\*/g, '<em>$1</em>');
   // Strikethrough: ~~text~~
   result = result.replace(/~~(.+?)~~/g, '<del>$1</del>');
-  // Links: [text](url) — after escaping, & in URLs becomes &amp; which is
-  // correct HTML for href attributes (browsers decode it)
-  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  // Links: [text](url) — the URL is already HTML-escaped by escapeHtml
+  // above. We ALSO check the scheme against SAFE_URL_SCHEMES so that
+  // `[click](javascript:...)` and friends don't become live links. An
+  // unsafe URL falls through as the raw markdown text — the user sees
+  // `[click](javascript:...)` on the page, which is the right failure
+  // mode: visibly broken, not silently exploitable.
+  result = result.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    (match, label, href) =>
+      isSafeUrl(href)
+        ? `<a href="${href}" rel="noopener noreferrer">${label}</a>`
+        : match,
+  );
   return result;
 }
 

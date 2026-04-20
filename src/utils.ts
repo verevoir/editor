@@ -11,9 +11,9 @@ import type { UIHint } from '@verevoir/schema';
 export interface ZodDef {
   type?: string;
   entries?: Record<string, string>;
-  element?: z.ZodType;
-  shape?: Record<string, z.ZodType>;
-  innerType?: z.ZodType;
+  element?: z.ZodTypeAny;
+  shape?: Record<string, z.ZodTypeAny>;
+  innerType?: z.ZodTypeAny;
 }
 
 export function getZodDef(schema: unknown): ZodDef | undefined {
@@ -21,22 +21,30 @@ export function getZodDef(schema: unknown): ZodDef | undefined {
   return s?._zod?.def ?? s?.def;
 }
 
-function typeName(schema: z.ZodType): string {
+function typeName(schema: unknown): string {
   return getZodDef(schema)?.type ?? '';
 }
 
-/** Strip ZodOptional and ZodDefault wrappers to get the inner schema */
-export function unwrapSchema(schema: z.ZodType): z.ZodType {
+/**
+ * Strip ZodOptional and ZodDefault wrappers to get the inner schema.
+ * Accepts `unknown` to sidestep the zod 4 packaging quirk that leaves
+ * multiple ZodType definitions in play when types are bundled across
+ * file-linked packages (a v3 compat `ZodType<any,any,any>` vs the v4
+ * `ZodType<unknown,unknown,$ZodTypeInternals<...>>`). All consumers
+ * pass a real zod schema; the runtime check in getZodDef handles any
+ * shape.
+ */
+export function unwrapSchema(schema: unknown): z.ZodTypeAny {
   const def = getZodDef(schema);
   if (def?.type === 'optional' || def?.type === 'default') {
     const inner = def.innerType;
     if (inner) return unwrapSchema(inner);
   }
-  return schema;
+  return schema as z.ZodTypeAny;
 }
 
 /** Infer a UIHint from a raw Zod schema type. Used for nested fields inside arrays/objects that lack FieldMeta. Falls back to `'text'`. */
-export function inferUIHint(schema: z.ZodType): UIHint {
+export function inferUIHint(schema: unknown): UIHint {
   const unwrapped = unwrapSchema(schema);
   const name = typeName(unwrapped);
 

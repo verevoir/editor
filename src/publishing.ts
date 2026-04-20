@@ -1,4 +1,19 @@
-import { text, select } from '@verevoir/schema';
+import { text, select, type StringField, type UIHint } from '@verevoir/schema';
+
+/**
+ * Local `datetime` helper — lives here instead of in @verevoir/schema
+ * because the schema engine currently publishes UIHint as a strict
+ * union that doesn't include `'datetime'`. This patch injects the
+ * hint onto the StringField's meta so the editor's FieldRenderer
+ * dispatches to DateTimeField by string key. Storage treats the
+ * field as plain text. When the schema engine cuts a release with
+ * `'datetime'` in UIHint, this helper should move there.
+ */
+function datetime(label: string): StringField {
+  const field = text(label);
+  (field.meta as { ui: UIHint }).ui = 'datetime' as UIHint;
+  return field;
+}
 
 /**
  * Shared fields for any publishable block.
@@ -19,8 +34,8 @@ export function publishFields() {
     status: select('Status', ['draft', 'published', 'archived']).default(
       'draft',
     ),
-    publishFrom: text('Publish From').optional(),
-    publishTo: text('Publish To').optional(),
+    publishFrom: datetime('Publish From').optional(),
+    publishTo: datetime('Publish To').optional(),
   };
 }
 

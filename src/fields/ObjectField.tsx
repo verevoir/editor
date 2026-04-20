@@ -29,7 +29,11 @@ export function ObjectField({
             key={key}
             name={`${name}.${key}`}
             field={{
-              schema: subSchema,
+              // Cast skirts a zod 4 dual-packaging quirk when types
+              // bundle across file-linked packages; runtime shape is
+              // unaffected.
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              schema: subSchema as any,
               meta: {
                 label: key,
                 ui: inferUIHint(subSchema),

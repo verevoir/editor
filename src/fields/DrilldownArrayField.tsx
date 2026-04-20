@@ -45,7 +45,12 @@ export function DrilldownArrayField({
             <FieldRenderer
               name={`${name}.${index}`}
               field={{
-                schema: elementSchema,
+                // Cast avoids a zod 4 packaging quirk: `elementSchema`
+                // comes from `getZodDef(...).element` (typed on our
+                // side as v4 ZodType) but FieldDefinition here uses
+                // the v3-compat ZodType shape.
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                schema: elementSchema as any,
                 meta: field.meta.itemMeta
                   ? {
                       ...field.meta.itemMeta,

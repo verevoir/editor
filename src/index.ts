@@ -18,6 +18,7 @@ export { DrilldownArrayField } from './fields/DrilldownArrayField.js';
 export { ObjectField } from './fields/ObjectField.js';
 export { ReferenceField } from './fields/ReferenceField.js';
 export { LinkField } from './fields/LinkField.js';
+export { DateTimeField } from './fields/DateTimeField.js';
 
 // Reference context
 export {
@@ -56,6 +57,13 @@ export {
 
 // Publishing
 export { publishFields, isLive } from './publishing.js';
+
+// Tagging
+export { tagsField, collectTags, filterByTag } from './tagging.js';
+
+// Natural-language date parsing (internal to DateTimeField; exposed
+// so tests and consumers can reuse — future home is @verevoir/time).
+export { parseNaturalDate } from './parse-date.js';
 
 // Utilities
 export { unwrapSchema, inferUIHint } from './utils.js';

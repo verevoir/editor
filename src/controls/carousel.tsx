@@ -1,12 +1,25 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { defineBlock, text, richText, array, object } from '@verevoir/schema';
+import {
+  defineBlock,
+  text,
+  richText,
+  array,
+  object,
+  type BlockDefinition,
+  type FieldRecord,
+} from '@verevoir/schema';
 import { markdownToHtml } from '../markdown.js';
 import type { ControlDefinition } from './types.js';
 
-// Carousel slides share the hero shape
-export const carouselBlock = defineBlock({
+// Explicit type annotation avoids a zod 4 dual-packaging quirk — the
+// inferred type of defineBlock references internal zod types whose
+// import path depends on whether schema-engine has its own nested
+// zod or resolves up to a hoisted one. Returning a widened
+// BlockDefinition<FieldRecord> keeps the build portable.
+// Carousel slides share the hero shape.
+export const carouselBlock: BlockDefinition<FieldRecord> = defineBlock({
   name: 'carousel',
   fields: {
     slides: array(

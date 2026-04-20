@@ -618,7 +618,7 @@ describe('TableArrayField', () => {
     }),
   );
 
-  it('renders one row per item with column inputs', () => {
+  it('renders one list row per item with primary + secondary preview', () => {
     render(
       <TableArrayField
         name="buttons"
@@ -630,48 +630,54 @@ describe('TableArrayField', () => {
         onChange={() => {}}
       />,
     );
-    expect(screen.getByDisplayValue('Sign up')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('/signup')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Learn more')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('/about')).toBeInTheDocument();
+    // List+modal UI: primary preview is the row's label, secondary is
+    // the url. Both appear inline; cell-level inputs live in the modal.
+    expect(screen.getByText('Sign up')).toBeInTheDocument();
+    expect(screen.getByText('/signup')).toBeInTheDocument();
+    expect(screen.getByText('Learn more')).toBeInTheDocument();
+    expect(screen.getByText('/about')).toBeInTheDocument();
   });
 
-  it('renders column headers from the inner field labels', () => {
-    render(
+  it('shows a drag handle and move-up/down controls per row', () => {
+    const { container } = render(
       <TableArrayField
         name="buttons"
         field={buttonsField}
-        value={[]}
+        value={[
+          { label: 'Sign up', url: '/signup' },
+          { label: 'Learn more', url: '/about' },
+        ]}
         onChange={() => {}}
       />,
     );
     expect(
-      screen.getByRole('columnheader', { name: /Label/ }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('columnheader', { name: /URL/ }),
-    ).toBeInTheDocument();
+      container.querySelectorAll('[data-list-array-grip]').length,
+    ).toBe(2);
+    expect(screen.getAllByLabelText('Move up')).toHaveLength(2);
+    expect(screen.getAllByLabelText('Move down')).toHaveLength(2);
   });
 
-  it('emits the updated row when a cell is edited', () => {
+  it('reorders rows via the move-down button', () => {
     const onChange = vi.fn();
     render(
       <TableArrayField
         name="buttons"
         field={buttonsField}
-        value={[{ label: 'Sign up', url: '/signup' }]}
+        value={[
+          { label: 'Sign up', url: '/signup' },
+          { label: 'Learn more', url: '/about' },
+        ]}
         onChange={onChange}
       />,
     );
-    fireEvent.change(screen.getByDisplayValue('Sign up'), {
-      target: { value: 'Get started' },
-    });
+    fireEvent.click(screen.getAllByLabelText('Move down')[0]);
     expect(onChange).toHaveBeenCalledWith([
-      { label: 'Get started', url: '/signup' },
+      { label: 'Learn more', url: '/about' },
+      { label: 'Sign up', url: '/signup' },
     ]);
   });
 
-  it('adds a new empty row when Add is clicked', () => {
+  it('adds a new empty row when Add is clicked and uses the item label (singular)', () => {
     const onChange = vi.fn();
     render(
       <TableArrayField
@@ -681,7 +687,9 @@ describe('TableArrayField', () => {
         onChange={onChange}
       />,
     );
-    fireEvent.click(screen.getByText(/Add Buttons/));
+    // itemMeta.label is 'Button' (from object('Button', ...)), so the
+    // Add button reads "+ Add Button" — singular, not "+ Add Buttons".
+    fireEvent.click(screen.getByText(/Add Button$/));
     expect(onChange).toHaveBeenCalledWith([
       { label: 'Sign up', url: '/signup' },
       { label: '', url: '' },
@@ -718,8 +726,10 @@ describe('ArrayField dispatcher', () => {
         onChange={() => {}}
       />,
     );
+    // The dispatcher routes to TableArrayField which renders the
+    // list+modal variant; the data-array-display marker is 'list'.
     expect(
-      container.querySelector('[data-array-display="table"]'),
+      container.querySelector('[data-array-display="list"]'),
     ).toBeInTheDocument();
   });
 

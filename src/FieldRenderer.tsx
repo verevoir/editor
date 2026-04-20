@@ -1,4 +1,5 @@
 import type { FieldEditorProps, FieldOverrides } from './types.js';
+import { FieldShell } from './FieldShell.js';
 import { TextField } from './fields/TextField.js';
 import { RichTextField } from './fields/RichTextField.js';
 import { NumberField } from './fields/NumberField.js';
@@ -23,17 +24,26 @@ const builtInFields: Record<string, ComponentType<FieldEditorProps<any>>> = {
   link: LinkField,
 };
 
+/**
+ * UI hints whose components own their entire layout (label inline,
+ * special control shape, etc.) and don't want a fieldset wrapper.
+ * The shell still renders, but in `bare` mode — no fieldset, no
+ * legend — so the help icon and depth tracking still work.
+ */
+const BARE_FIELD_UIS = new Set(['boolean']);
+
 export interface FieldRendererProps extends FieldEditorProps {
   overrides?: FieldOverrides;
 }
 
 /**
- * Resolves the correct field component for a field definition.
- * Resolution order: field-name override > UIHint override > built-in default.
+ * Resolves the correct field component for a field definition and
+ * wraps it in a `<FieldShell>`. Resolution order: field-name
+ * override > UIHint override > built-in default.
  *
- * If the field's metadata includes a `hint`, it is rendered as a small
- * paragraph after the field component. The hint is wrapped in a
- * `data-field-hint` element so consumers can style or hide it via CSS.
+ * The shell handles the label (rendered as a fieldset legend) and
+ * the optional hint (rendered as a click-to-toggle help icon).
+ * Field components themselves should not render their own label.
  */
 export function FieldRenderer({
   name,
@@ -51,7 +61,13 @@ export function FieldRenderer({
   }
 
   return (
-    <>
+    <FieldShell
+      name={name}
+      label={field.meta.label}
+      hint={field.meta.hint}
+      ui={field.meta.ui}
+      bare={BARE_FIELD_UIS.has(field.meta.ui)}
+    >
       <Component
         name={name}
         field={field}
@@ -59,12 +75,7 @@ export function FieldRenderer({
         onChange={onChange}
         blockValue={blockValue}
       />
-      {field.meta.hint && (
-        <p className="verevoir-field-hint" data-field-hint={name}>
-          {field.meta.hint}
-        </p>
-      )}
-    </>
+    </FieldShell>
   );
   /* eslint-enable react-hooks/static-components */
 }

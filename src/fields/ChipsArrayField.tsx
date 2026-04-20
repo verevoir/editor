@@ -10,7 +10,6 @@ import type { FieldEditorProps } from '../types.js';
  */
 export function ChipsArrayField({
   name,
-  field,
   value,
   onChange,
 }: FieldEditorProps<unknown[]>) {
@@ -45,8 +44,7 @@ export function ChipsArrayField({
   };
 
   return (
-    <div data-field={name} data-array-display="chips">
-      <label htmlFor={`${name}-input`}>{field.meta.label}</label>
+    <div data-array-display="chips">
       <div data-chips-container>
         {items.map((item, index) => (
           <span key={index} data-chip={index}>

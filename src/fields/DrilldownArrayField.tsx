@@ -1,9 +1,7 @@
 import type { z } from 'zod';
 import type { FieldEditorProps } from '../types.js';
-import { unwrapSchema, inferUIHint } from '../utils.js';
+import { unwrapSchema, inferUIHint, getZodDef } from '../utils.js';
 import { FieldRenderer } from '../FieldRenderer.js';
-
-type ZodInternal = { _zod?: { def?: { type?: string; element?: z.ZodType } } };
 
 /**
  * Vertical drill-down list of items, each fully rendered via
@@ -20,7 +18,7 @@ export function DrilldownArrayField({
 }: FieldEditorProps<unknown[]>) {
   const items = value ?? [];
   const unwrapped = unwrapSchema(field.schema);
-  const def = (unwrapped as unknown as ZodInternal)._zod?.def;
+  const def = getZodDef(unwrapped);
   const elementSchema: z.ZodType | undefined =
     def?.type === 'array' ? def.element : undefined;
   const elementHint = elementSchema ? inferUIHint(elementSchema) : 'text';
@@ -40,8 +38,7 @@ export function DrilldownArrayField({
   };
 
   return (
-    <div data-field={name} data-array-display="drilldown">
-      <label>{field.meta.label}</label>
+    <div data-array-display="drilldown">
       {items.map((item, index) => (
         <div key={index} data-array-item={index}>
           {elementSchema && (
@@ -83,7 +80,7 @@ export function DrilldownArrayField({
 function getDefault(schema: z.ZodType | undefined): unknown {
   if (!schema) return '';
   const unwrapped = unwrapSchema(schema);
-  const name = (unwrapped as unknown as ZodInternal)._zod?.def?.type ?? '';
+  const name = getZodDef(unwrapped)?.type ?? '';
   if (name === 'string') return '';
   if (name === 'number') return 0;
   if (name === 'boolean') return false;

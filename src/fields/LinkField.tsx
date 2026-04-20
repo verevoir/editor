@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FieldEditorProps } from '../types.js';
 import { useLinkSearch, type LinkSearchResult } from '../LinkSearchContext.js';
 
@@ -7,35 +7,32 @@ type LinkKind = 'empty' | 'external' | 'internal';
 const EXTERNAL_PROTOCOL =
   /^(?:https?|mailto|tel|ftp|sms|geo|news|nntp|gopher|wais|telnet):/i;
 
-/**
- * Classify a link value as empty, external (has a protocol),
- * or internal (a slug or relative path).
- */
 function classify(value: string): LinkKind {
   if (!value) return 'empty';
   if (EXTERNAL_PROTOCOL.test(value)) return 'external';
   return 'internal';
 }
 
+const ALL_TYPES = '__all__';
+
 /**
- * Link field — a single text input that accepts a URL or a slug
- * and auto-detects which.
+ * Link field — typeahead combobox.
  *
- * UX states:
- * - Empty: text input + "browse" button. Type a URL/slug or click
- *   browse to open the picker.
- * - Editing: text input + browse button (same as empty, but with a
- *   value).
- * - Resolved: compact display showing the link's title (for known
- *   internal pages) or the URL (for external), with an "edit"
- *   button to switch back to editing mode.
+ * Two visual modes:
  *
- * The picker uses the same `LinkSearchContext` as the rich-text
- * editor's inline links — set up a `LinkSearchProvider` once and
- * both surfaces benefit.
+ * - **Resolved**: an internal page is selected. The chip shows the
+ *   page's block type (small uppercase label) and title. A clear
+ *   button reverts to picking mode.
+ * - **Picking** (default): an editable text input on the left, a type
+ *   filter `<select>` and a "Browse" toggle on the right. As the
+ *   value changes, a dropdown lists matching internal pages plus an
+ *   "External link" row at the top showing the literal URL — picking
+ *   it (or just leaving the value) commits the URL as-is.
  *
- * Stores as a plain string. No discriminator field, no two-question
- * flow — internal vs external is inferred from the value.
+ * The type filter's options are discovered from the consumer's
+ * search results — every new `blockType` (page, asset, etc.) appears
+ * as a filter automatically, so wiring an asset adapter doesn't
+ * require any change here.
  */
 export function LinkField({
   name,
@@ -47,24 +44,18 @@ export function LinkField({
   const currentValue = value ?? '';
   const kind = classify(currentValue);
 
-  const [isEditing, setIsEditing] = useState(kind === 'empty');
   const [resolved, setResolved] = useState<LinkSearchResult | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [results, setResults] = useState<LinkSearchResult[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string>(ALL_TYPES);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  /** Search query inside the dropdown — independent of the URL input. */
+  const [searchQuery, setSearchQuery] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // When the value changes (e.g. from the picker), exit editing mode
-  // and clear stale resolution. Synchronising local UI state from a
-  // controlled value — not a derived render.
-  useEffect(() => {
-    if (kind === 'empty') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync local state from controlled prop
-      setIsEditing(true);
-      setResolved(null);
-      return;
-    }
-    setIsEditing(false);
-  }, [currentValue, kind]);
-
-  // Resolve internal slugs to a title when search is available.
+  // Resolve internal slugs to a title — the consumer's search returns
+  // a list; we pick the one whose URL matches exactly.
   useEffect(() => {
     if (kind !== 'internal' || !search) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale resolution
@@ -72,9 +63,9 @@ export function LinkField({
       return;
     }
     let cancelled = false;
-    search(currentValue).then((results) => {
+    search(currentValue).then((r) => {
       if (cancelled) return;
-      const exact = results.find((r) => r.url === currentValue);
+      const exact = r.find((entry) => entry.url === currentValue);
       setResolved(exact ?? null);
     });
     return () => {
@@ -82,211 +73,173 @@ export function LinkField({
     };
   }, [currentValue, kind, search]);
 
-  return (
-    <div data-field={name} data-link-field data-link-kind={kind}>
-      <label htmlFor={isEditing ? `${name}-input` : undefined}>
-        {field.meta.label}
-      </label>
-
-      {isEditing ? (
-        <EditView
-          name={name}
-          value={currentValue}
-          required={field.meta.required}
-          onChange={onChange}
-          onPick={search ? () => setPickerOpen(true) : undefined}
-        />
-      ) : (
-        <ResolvedView
-          value={currentValue}
-          kind={kind}
-          resolved={resolved}
-          onEdit={() => setIsEditing(true)}
-        />
-      )}
-
-      {pickerOpen && search && (
-        <PickerModal
-          search={search}
-          onPick={(result) => {
-            onChange(result.url);
-            setPickerOpen(false);
-          }}
-          onClose={() => setPickerOpen(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-// --- Edit view --------------------------------------------------------------
-
-interface EditViewProps {
-  name: string;
-  value: string;
-  required: boolean;
-  onChange: (v: string) => void;
-  onPick: (() => void) | undefined;
-}
-
-function EditView({ name, value, required, onChange, onPick }: EditViewProps) {
-  const kind = classify(value);
-  return (
-    <div data-link-edit>
-      <input
-        id={`${name}-input`}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        placeholder="https://example.com or /about"
-        data-link-input
-      />
-      {onPick && (
-        <button
-          type="button"
-          onClick={onPick}
-          aria-label="Browse internal pages"
-          title="Browse internal pages"
-          data-link-browse
-        >
-          Browse…
-        </button>
-      )}
-      {value && (
-        <span data-link-kind-badge data-link-kind={kind}>
-          {kind === 'external' ? 'external' : 'internal'}
-        </span>
-      )}
-    </div>
-  );
-}
-
-// --- Resolved view ----------------------------------------------------------
-
-interface ResolvedViewProps {
-  value: string;
-  kind: LinkKind;
-  resolved: LinkSearchResult | null;
-  onEdit: () => void;
-}
-
-function ResolvedView({ value, kind, resolved, onEdit }: ResolvedViewProps) {
-  const display =
-    kind === 'internal' && resolved ? resolved.title : displayUrl(value);
-  const subtitle =
-    kind === 'internal' && resolved
-      ? resolved.url
-      : kind === 'external'
-        ? 'External link'
-        : value;
-
-  return (
-    <div data-link-resolved data-link-kind={kind}>
-      <div data-link-resolved-content>
-        <div data-link-title>{display}</div>
-        <div data-link-subtitle>{subtitle}</div>
-      </div>
-      <button type="button" onClick={onEdit} data-link-edit-button>
-        Edit
-      </button>
-    </div>
-  );
-}
-
-function displayUrl(url: string): string {
-  // Drop protocol for compactness in display.
-  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-}
-
-// --- Picker modal -----------------------------------------------------------
-
-interface PickerModalProps {
-  search: (query: string) => Promise<LinkSearchResult[]>;
-  onPick: (result: LinkSearchResult) => void;
-  onClose: () => void;
-}
-
-function PickerModal({ search, onPick, onClose }: PickerModalProps) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<LinkSearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Initial load: empty query returns the most relevant items.
+  // Browse search — driven by the dropdown's OWN search input, NOT
+  // the URL input. Only runs while the dropdown is open. Empty query
+  // is a "show me everything" signal — the consumer's search decides
+  // what that means.
   useEffect(() => {
-    inputRef.current?.focus();
+    if (!search || !dropdownOpen) return;
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- async search, set in callback
-    setLoading(true);
-    search(query).then((r) => {
-      if (cancelled) return;
-      setResults(r);
-      setLoading(false);
+    search(searchQuery.trim()).then((r) => {
+      if (!cancelled) setResults(r);
     });
     return () => {
       cancelled = true;
     };
-  }, [query, search]);
+  }, [searchQuery, search, dropdownOpen]);
 
-  return (
-    <div
-      role="dialog"
-      aria-label="Pick a page"
-      data-link-picker
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
-    >
-      <div data-link-picker-backdrop onClick={onClose} />
-      <div data-link-picker-panel>
-        <header data-link-picker-header>
-          <strong>Pick a page</strong>
-          <button type="button" onClick={onClose} aria-label="Close">
+  // Click-outside closes the dropdown.
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onPointer);
+    return () => document.removeEventListener('mousedown', onPointer);
+  }, [dropdownOpen]);
+
+  // Available type options come from the union of result blockTypes
+  // — that way an asset adapter that returns `blockType: 'asset'`
+  // surfaces an "asset" filter immediately, no UI change needed.
+  const availableTypes = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of results) if (r.blockType) set.add(r.blockType);
+    return Array.from(set).sort();
+  }, [results]);
+
+  const filteredResults = useMemo(() => {
+    if (typeFilter === ALL_TYPES) return results;
+    return results.filter((r) => r.blockType === typeFilter);
+  }, [results, typeFilter]);
+
+  const pickResult = (result: LinkSearchResult) => {
+    onChange(result.url);
+    setDropdownOpen(false);
+    setSearchQuery('');
+    inputRef.current?.blur();
+  };
+
+  const openBrowse = () => {
+    setDropdownOpen(true);
+    setSearchQuery('');
+    // Focus the dropdown's search input so the user can start typing
+    // a page name immediately. requestAnimationFrame waits for the
+    // dropdown to render.
+    requestAnimationFrame(() => searchInputRef.current?.focus());
+  };
+
+  // Resolved internal — chip with clear button.
+  if (kind === 'internal' && resolved) {
+    return (
+      <div data-link-field data-link-kind={kind} ref={containerRef}>
+        <div data-link-resolved>
+          <div data-link-resolved-content>
+            <div data-link-type>
+              {(resolved.blockType ?? 'internal').toUpperCase()}
+            </div>
+            <div data-link-title>{resolved.title}</div>
+          </div>
+          <button
+            type="button"
+            data-link-clear
+            aria-label="Clear link"
+            title="Clear link"
+            onClick={() => onChange('')}
+          >
             ×
           </button>
-        </header>
-        <input
-          ref={inputRef}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by title…"
-          data-link-picker-search
-        />
-        <div data-link-picker-results>
-          {loading && <div data-link-picker-loading>Searching…</div>}
-          {!loading && results.length === 0 && (
-            <div data-link-picker-empty>
-              {query
-                ? `No matches for "${query}"`
-                : 'Nothing to show — try searching.'}
-            </div>
-          )}
-          {!loading && results.length > 0 && (
-            <ul>
-              {results.map((r) => (
-                <li key={r.id}>
-                  <button type="button" onClick={() => onPick(r)}>
-                    <span data-link-picker-result-title>{r.title}</span>
-                    <span data-link-picker-result-meta>
-                      {r.url}
-                      {r.blockType && (
-                        <>
-                          {' · '}
-                          <span data-link-picker-result-type>
-                            {r.blockType}
-                          </span>
-                        </>
-                      )}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
+    );
+  }
+
+  // Picking mode — input + filter + browse + dropdown.
+  return (
+    <div data-link-field data-link-kind={kind} ref={containerRef}>
+      <div data-link-edit>
+        <input
+          ref={inputRef}
+          id={`${name}-input`}
+          type="text"
+          value={currentValue}
+          onChange={(e) => onChange(e.target.value)}
+          required={field.meta.required}
+          placeholder="https://example.com or /about"
+          data-link-input
+          autoComplete="off"
+        />
+        {search && (
+          <button
+            type="button"
+            onClick={() => (dropdownOpen ? setDropdownOpen(false) : openBrowse())}
+            aria-label="Browse pages"
+            title="Browse pages"
+            data-link-browse
+          >
+            Browse
+          </button>
+        )}
+      </div>
+
+      {dropdownOpen && search && (
+        <div data-link-dropdown role="listbox">
+          <div data-link-dropdown-controls>
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter by name…"
+              data-link-dropdown-search
+              autoComplete="off"
+            />
+            {availableTypes.length > 0 && (
+              <select
+                data-link-type-filter
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                aria-label="Filter by type"
+                title="Filter by type"
+              >
+                <option value={ALL_TYPES}>All types</option>
+                {availableTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          <div data-link-dropdown-results>
+            {filteredResults.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                role="option"
+                data-link-dropdown-result
+                onClick={() => pickResult(r)}
+              >
+                {r.blockType && (
+                  <span data-link-dropdown-type>
+                    {r.blockType.toUpperCase()}
+                  </span>
+                )}
+                <span data-link-dropdown-title>{r.title}</span>
+              </button>
+            ))}
+            {filteredResults.length === 0 && (
+              <div data-link-dropdown-empty>
+                {results.length === 0
+                  ? 'No pages available.'
+                  : 'No matches for this filter.'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

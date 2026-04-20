@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { ReactElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   text,
@@ -10,7 +11,33 @@ import {
   object,
   reference,
 } from '@verevoir/schema';
+import type { FieldDefinition } from '@verevoir/schema';
+import { FieldShell } from '../src/FieldShell.js';
 import { TextField } from '../src/fields/TextField.js';
+
+/**
+ * Tests render field components in isolation, but the visible
+ * label, fieldset border, and the htmlFor association used by
+ * `getByLabelText` all live in the FieldShell. This helper wraps
+ * the rendered field in a shell so the existing assertions keep
+ * working without the rest of the editor stack.
+ */
+function renderField(
+  name: string,
+  field: FieldDefinition,
+  child: ReactElement,
+) {
+  return render(
+    <FieldShell
+      name={name}
+      label={field.meta.label}
+      hint={field.meta.hint}
+      ui={field.meta.ui}
+    >
+      {child}
+    </FieldShell>,
+  );
+}
 import { RichTextField } from '../src/fields/RichTextField.js';
 import { NumberField } from '../src/fields/NumberField.js';
 import { BooleanField } from '../src/fields/BooleanField.js';
@@ -29,7 +56,9 @@ import type { CopyAssistRequest } from '../src/CopyAssistContext.js';
 describe('TextField', () => {
   it('renders a text input with label', () => {
     const field = text('Title');
-    render(
+    renderField(
+      'title',
+      field,
       <TextField
         name="title"
         field={field}
@@ -44,7 +73,9 @@ describe('TextField', () => {
   it('calls onChange when typing', () => {
     const onChange = vi.fn();
     const field = text('Title');
-    render(
+    renderField(
+      'title',
+      field,
       <TextField name="title" field={field} value="" onChange={onChange} />,
     );
     fireEvent.change(screen.getByLabelText('Title'), {
@@ -55,7 +86,9 @@ describe('TextField', () => {
 
   it('marks required fields', () => {
     const field = text('Title');
-    render(
+    renderField(
+      'title',
+      field,
       <TextField name="title" field={field} value="" onChange={() => {}} />,
     );
     expect(screen.getByLabelText('Title')).toBeRequired();
@@ -63,7 +96,9 @@ describe('TextField', () => {
 
   it('does not mark optional fields as required', () => {
     const field = text('Title').optional();
-    render(
+    renderField(
+      'title',
+      field,
       <TextField name="title" field={field} value="" onChange={() => {}} />,
     );
     expect(screen.getByLabelText('Title')).not.toBeRequired();
@@ -325,7 +360,9 @@ describe('RichTextField', () => {
 describe('NumberField', () => {
   it('renders a number input with label', () => {
     const field = number('Count');
-    render(
+    renderField(
+      'count',
+      field,
       <NumberField name="count" field={field} value={42} onChange={() => {}} />,
     );
     expect(screen.getByLabelText('Count')).toHaveValue(42);
@@ -335,7 +372,9 @@ describe('NumberField', () => {
   it('calls onChange with numeric value', () => {
     const onChange = vi.fn();
     const field = number('Count');
-    render(
+    renderField(
+      'count',
+      field,
       <NumberField name="count" field={field} value={0} onChange={onChange} />,
     );
     fireEvent.change(screen.getByLabelText('Count'), {
@@ -382,7 +421,9 @@ describe('BooleanField', () => {
 describe('SelectField', () => {
   it('renders options from ZodEnum', () => {
     const field = select('Status', ['draft', 'published', 'archived']);
-    render(
+    renderField(
+      'status',
+      field,
       <SelectField
         name="status"
         field={field}
@@ -397,7 +438,9 @@ describe('SelectField', () => {
   it('calls onChange with selected value', () => {
     const onChange = vi.fn();
     const field = select('Status', ['draft', 'published']);
-    render(
+    renderField(
+      'status',
+      field,
       <SelectField
         name="status"
         field={field}
@@ -413,7 +456,9 @@ describe('SelectField', () => {
 
   it('renders placeholder option', () => {
     const field = select('Status', ['draft', 'published']);
-    render(
+    renderField(
+      'status',
+      field,
       <SelectField name="status" field={field} value="" onChange={() => {}} />,
     );
     expect(screen.getByText('Select...')).toBeInTheDocument();
@@ -707,12 +752,14 @@ describe('ReferenceField', () => {
           ],
         }}
       >
-        <ReferenceField
-          name="author"
-          field={authorRef}
-          value="uuid-1"
-          onChange={() => {}}
-        />
+        <FieldShell name="author" label={authorRef.meta.label}>
+          <ReferenceField
+            name="author"
+            field={authorRef}
+            value="uuid-1"
+            onChange={() => {}}
+          />
+        </FieldShell>
       </ReferenceOptionsProvider>,
     );
     expect(screen.getByLabelText('Author')).toHaveValue('uuid-1');
@@ -740,12 +787,14 @@ describe('ReferenceField', () => {
       <ReferenceOptionsProvider
         options={{ author: [{ id: 'uuid-1', label: 'Alice' }] }}
       >
-        <ReferenceField
-          name="author"
-          field={authorRef}
-          value=""
-          onChange={onChange}
-        />
+        <FieldShell name="author" label={authorRef.meta.label}>
+          <ReferenceField
+            name="author"
+            field={authorRef}
+            value=""
+            onChange={onChange}
+          />
+        </FieldShell>
       </ReferenceOptionsProvider>,
     );
     fireEvent.change(screen.getByLabelText('Author'), {
@@ -761,7 +810,9 @@ describe('ObjectField', () => {
       street: text('Street'),
       city: text('City'),
     });
-    render(
+    renderField(
+      'address',
+      field,
       <ObjectField
         name="address"
         field={field}
@@ -769,7 +820,9 @@ describe('ObjectField', () => {
         onChange={() => {}}
       />,
     );
-    expect(screen.getByText('Address')).toBeInTheDocument();
+    // Address appears twice — once in the fieldset's <legend>
+    // and once in FieldShell's hidden htmlFor <label>.
+    expect(screen.getAllByText('Address').length).toBeGreaterThan(0);
     expect(screen.getByDisplayValue('123 Main')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Portland')).toBeInTheDocument();
   });

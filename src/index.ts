@@ -1,6 +1,8 @@
 // Components
 export { BlockEditor } from './BlockEditor.js';
 export { FieldRenderer } from './FieldRenderer.js';
+export { FieldShell } from './FieldShell.js';
+export type { FieldShellProps } from './FieldShell.js';
 
 // Field components
 export { TextField } from './fields/TextField.js';

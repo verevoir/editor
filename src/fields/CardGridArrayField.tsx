@@ -2,12 +2,8 @@ import { useState } from 'react';
 import type { FieldDefinition, FieldRecord } from '@verevoir/schema';
 import type { z } from 'zod';
 import type { FieldEditorProps } from '../types.js';
-import { unwrapSchema } from '../utils.js';
+import { unwrapSchema, getZodDef } from '../utils.js';
 import { BlockEditor } from '../BlockEditor.js';
-
-type ZodInternal = {
-  _zod?: { def?: { type?: string; element?: z.ZodType } };
-};
 
 type Item = Record<string, unknown>;
 
@@ -41,7 +37,6 @@ const SCALAR_PREVIEW_HINTS = new Set([
  * expanded card.
  */
 export function CardGridArrayField({
-  name,
   field,
   value,
   onChange,
@@ -59,7 +54,7 @@ export function CardGridArrayField({
   // and a validate function — we don't need validate here, but the
   // shape must match.
   const unwrapped = unwrapSchema(field.schema);
-  const def = (unwrapped as unknown as ZodInternal)._zod?.def;
+  const def = getZodDef(unwrapped);
   const elementSchema: z.ZodType | undefined =
     def?.type === 'array' ? def.element : undefined;
 
@@ -106,8 +101,7 @@ export function CardGridArrayField({
 
   if (fieldEntries.length === 0) {
     return (
-      <div data-field={name} data-array-display="cards">
-        <label>{field.meta.label}</label>
+      <div data-array-display="cards">
         <p>
           Cannot render as cards — no field metadata available. Use{' '}
           <code>array(...)</code> with an <code>object(...)</code> item to
@@ -118,9 +112,8 @@ export function CardGridArrayField({
   }
 
   return (
-    <div data-field={name} data-array-display="cards">
+    <div data-array-display="cards">
       <div data-cards-header>
-        <label>{field.meta.label}</label>
         <span data-cards-count>
           {items.length} {items.length === 1 ? 'item' : 'items'}
         </span>

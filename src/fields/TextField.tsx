@@ -7,15 +7,12 @@ export function TextField({
   onChange,
 }: FieldEditorProps<string>) {
   return (
-    <div data-field={name}>
-      <label htmlFor={name}>{field.meta.label}</label>
-      <input
-        id={name}
-        type="text"
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
-        required={field.meta.required}
-      />
-    </div>
+    <input
+      id={name}
+      type="text"
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.value)}
+      required={field.meta.required}
+    />
   );
 }

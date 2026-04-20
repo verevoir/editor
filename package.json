@@ -1,6 +1,6 @@
 {
   "name": "@verevoir/editor",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "license": "MIT",
   "description": "Lightweight React content editing components driven by Verevoir schema definitions",
   "homepage": "https://verevoir.io",

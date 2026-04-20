@@ -7,15 +7,12 @@ export function NumberField({
   onChange,
 }: FieldEditorProps<number>) {
   return (
-    <div data-field={name}>
-      <label htmlFor={name}>{field.meta.label}</label>
-      <input
-        id={name}
-        type="number"
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.valueAsNumber)}
-        required={field.meta.required}
-      />
-    </div>
+    <input
+      id={name}
+      type="number"
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.valueAsNumber)}
+      required={field.meta.required}
+    />
   );
 }

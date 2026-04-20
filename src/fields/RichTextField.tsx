@@ -49,8 +49,7 @@ export function RichTextField({
   };
 
   return (
-    <div data-field={name}>
-      <label>{field.meta.label}</label>
+    <>
       <div data-rich-text>
         <div
           data-rich-text-toolbar
@@ -155,7 +154,7 @@ export function RichTextField({
           onCancel={actions.closeLinkDialog}
         />
       )}
-    </div>
+    </>
   );
 }
 

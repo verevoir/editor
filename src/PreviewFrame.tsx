@@ -17,6 +17,8 @@ export interface PreviewFrameProps {
   children: React.ReactNode;
   viewports?: Viewport[];
   defaultViewport?: string;
+  /** Initial zoom percentage (25–100). Defaults to 100. */
+  defaultZoom?: number;
   className?: string;
 }
 
@@ -24,12 +26,13 @@ export function PreviewFrame({
   children,
   viewports = defaultViewports,
   defaultViewport = 'Desktop',
+  defaultZoom = 100,
   className,
 }: PreviewFrameProps) {
   const initial =
     viewports.find((v) => v.label === defaultViewport) || viewports[0];
   const [viewport, setViewport] = useState<Viewport>(initial);
-  const [zoom, setZoom] = useState(100);
+  const [zoom, setZoom] = useState(defaultZoom);
 
   const scale = zoom / 100;
 

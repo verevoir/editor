@@ -92,7 +92,7 @@ describe('useRichText', () => {
     );
     const editor = screen.getByTestId('editor');
     expect(editor.innerHTML).toBe(
-      '<p><a href="https://example.com">click</a></p>',
+      '<p><a href="https://example.com" rel="noopener noreferrer">click</a></p>',
     );
   });
 

@@ -1,11 +1,7 @@
 import type { z } from 'zod';
 import type { FieldEditorProps } from '../types.js';
-import { unwrapSchema, inferUIHint } from '../utils.js';
+import { unwrapSchema, inferUIHint, getZodDef } from '../utils.js';
 import { FieldRenderer } from '../FieldRenderer.js';
-
-type ZodInternal = {
-  _zod?: { def?: { type?: string; shape?: Record<string, z.ZodType> } };
-};
 
 export function ObjectField({
   name,
@@ -15,7 +11,7 @@ export function ObjectField({
 }: FieldEditorProps<Record<string, unknown>>) {
   const data = value ?? {};
   const unwrapped = unwrapSchema(field.schema);
-  const def = (unwrapped as unknown as ZodInternal)._zod?.def;
+  const def = getZodDef(unwrapped);
   const shape: Record<string, z.ZodType> =
     def?.type === 'object' && def.shape ? def.shape : {};
 
@@ -24,10 +20,9 @@ export function ObjectField({
   };
 
   return (
-    <fieldset data-field={name}>
-      <legend>{field.meta.label}</legend>
+    <>
       {Object.entries(shape).map(([key, subSchema]) => {
-        const subDef = (subSchema as unknown as ZodInternal)._zod?.def;
+        const subDef = getZodDef(subSchema);
         const required = subDef?.type !== 'optional';
         return (
           <FieldRenderer
@@ -46,6 +41,6 @@ export function ObjectField({
           />
         );
       })}
-    </fieldset>
+    </>
   );
 }

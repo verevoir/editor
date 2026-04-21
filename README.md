@@ -1,18 +1,14 @@
 # @verevoir/editor
 
-Lightweight React components that auto-render content editing forms from [`@verevoir/schema`](https://github.com/verevoir/schema-engine) block definitions. Pass a `BlockDefinition` and data; the editor renders correct inputs based on each field's `UIHint`.
-
-No validation logic lives here — the schema engine handles that. No storage dependency — the editor is pure UI.
-
-## Install
+Auto-generated React editing UI for [`@verevoir/schema`](https://www.npmjs.com/package/@verevoir/schema) block definitions. Pass a block and its data, get a working form. Swap or extend any field component without touching the schema.
 
 ```bash
-npm install @verevoir/editor
+npm install @verevoir/editor @verevoir/schema
 ```
 
-**Peer dependencies:** `react`, `react-dom`, and `zod` must be installed in your project to avoid duplicate instances.
+**Peers:** `react`, `react-dom`, `zod` — provide your own to avoid duplicate instances.
 
-## Quick Start
+## Quick start
 
 ```tsx
 import { defineBlock, text, richText, boolean } from '@verevoir/schema';
@@ -39,9 +35,62 @@ function HeroEditor() {
 }
 ```
 
-## Preview Frame
+That's the whole loop. Every field in the schema renders an appropriate input, labelled from `.label`, hinted via `.hint()`, wrapped in a fieldset legend with an optional help-icon popover.
 
-Viewport-switching preview container with zoom control. Renders children in a scaled, width-constrained surface — no knowledge of content blocks.
+## What's in it
+
+### Field components
+
+Ten built-in fields covering the schema's UI hints:
+
+- **`TextField`**, **`RichTextField`**, **`NumberField`**, **`BooleanField`**, **`SelectField`** — single-value inputs
+- **`DateTimeField`** — natural-language date input ("tomorrow", "tuesday", "4 June") resolved on blur + native time picker, stored as UTC ISO
+- **`LinkField`** — single input that auto-detects internal-vs-external, with a Browse dropdown for picking internal documents
+- **`ReferenceField`** — picker that surfaces options via `ReferenceOptionsProvider` context
+- **`ArrayField`** — dispatcher that picks the right variant:
+  - `ChipsArrayField` for scalar arrays (strings, numbers)
+  - `TableArrayField` for arrays of small objects (list + modal editing, drag-and-drop reorder)
+  - `CardGridArrayField` for arrays of medium objects (5+ fields or richer content)
+  - `DrilldownArrayField` as the fallback
+- **`ObjectField`** — nested fieldset for composite fields
+
+Route to a different variant per field with `.display('cards')` / `.display('table')` in the schema, or override wholesale via `BlockEditor`'s `overrides` prop.
+
+### Augmentation helpers
+
+Drop-in field sets that compose into any block:
+
+```typescript
+import { publishFields, tagsField } from '@verevoir/editor';
+import { defineBlock, text, richText } from '@verevoir/schema';
+
+const article = defineBlock({
+  name: 'article',
+  fields: {
+    title: text('Title'),
+    body: richText('Body'),
+    ...publishFields(),  // status, publishFrom, publishTo
+    ...tagsField(),      // tags: string[]
+  },
+});
+```
+
+- **`publishFields()`** — adds `status` (`'draft' | 'published' | 'archived'`), `publishFrom`, `publishTo`. Pair with `isLive(data)` on public renders so drafts don't leak.
+- **`tagsField()`** — adds `tags: string[]` with the chip input. `collectTags(docs)` and `filterByTag(docs, name)` are pure app-level helpers for autocomplete and query.
+
+The pattern: editor-layer features are schema augmentations, not storage primitives. Storage stays shape-agnostic; resolution functions read the fields at runtime.
+
+### Rich-text context providers
+
+Optional integrations for richer editing inside `RichTextField`:
+
+- **`ReferenceOptionsProvider`** — supplies id/label pairs for reference pickers
+- **`LinkSearchProvider`** — supplies an async search function for internal linking inside markdown
+- **`CopyAssistProvider`** — supplies an async "generate copy" function; the editor calls it, the app owns the LLM and the prompt
+
+All three are thin context surfaces — the app owns the data and the policy, the editor owns the UI.
+
+### Preview frame
 
 ```tsx
 import { PreviewFrame } from '@verevoir/editor';
@@ -52,72 +101,40 @@ import { PreviewFrame } from '@verevoir/editor';
 </PreviewFrame>;
 ```
 
-Custom viewports:
+Viewport-switching container with zoom. Content is arbitrary React — the frame knows nothing about content blocks.
+
+### Controls
+
+Three ready-made content blocks (`heroBlock`, `contentBlock`, `carouselBlock`) with matching renderers. Use as examples for your own blocks, or import them directly.
+
+## Styling
+
+Field markup uses `data-` attributes exclusively — no class names to lock onto. Optional CSS files provide sensible starting points:
 
 ```tsx
-<PreviewFrame
-  viewports={[
-    { label: 'Small', width: 320 },
-    { label: 'Large', width: 1440 },
-  ]}
-  defaultViewport="Large"
->
-  {children}
-</PreviewFrame>
-```
-
-## Example Styles
-
-The editor renders unstyled HTML with `data-` attributes. Optional CSS files provide a sensible starting point — import them to use, or copy and adapt:
-
-```tsx
-// Style BlockEditor form fields
 import '@verevoir/editor/styles/editor-form.css';
-
-// Style PreviewFrame
 import '@verevoir/editor/styles/preview-frame.css';
 ```
 
-For `editor-form.css`, wrap your `BlockEditor` in a container with `data-editor-form`:
+Or write your own against the documented data attributes. [`@verevoir/admin`](https://www.npmjs.com/package/@verevoir/admin) ships a heavier theme you can copy.
 
-```tsx
-<div data-editor-form>
-  <BlockEditor block={block} value={value} onChange={onChange} />
-</div>
-```
+## Design decisions
 
-## Architecture
+- **Fully controlled.** `BlockEditor` takes `value` + `onChange`. No internal form state; consumer owns the data.
+- **Schema introspection.** `SelectField` reads `ZodEnum.options`. `ArrayField` dispatches based on `ZodArray.element`'s shape. `ObjectField` reads `ZodObject.shape`. A `getZodDef(schema)` helper tolerates both live zod instances and JSON-roundtripped schemas (for Astro `client:only` islands and similar).
+- **Override mechanism.** `overrides` prop on `BlockEditor` maps field names or UI hints to custom components. Field name wins over UI hint wins over default.
+- **No `<form>` tag.** The developer controls submission, validation timing, layout.
 
-| File                        | Responsibility                                                                                     |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `src/types.ts`              | Shared prop types — `FieldEditorProps`, `BlockEditorProps`, `FieldOverrides`                       |
-| `src/utils.ts`              | `unwrapSchema()` strips ZodOptional/ZodDefault wrappers; `inferUIHint()` maps Zod types to UIHints |
-| `src/BlockEditor.tsx`       | Top-level component — takes `BlockDefinition`, iterates fields, delegates to `FieldRenderer`       |
-| `src/FieldRenderer.tsx`     | Dispatch — maps UIHint to field component, resolves overrides (field-name > UIHint > default)      |
-| `src/PreviewFrame.tsx`      | Viewport-switching preview with zoom — renders children in a scaled, width-constrained surface     |
-| `src/fields/*.tsx`          | Eight built-in field components: Text, RichText, Number, Boolean, Select, Array, Object, Reference |
-| `src/hooks/useBlockForm.ts` | Optional hook — manages form state, validation via schema engine, dirty tracking                   |
-| `src/styles/*.css`          | Optional example CSS for PreviewFrame and BlockEditor forms                                        |
+## See it in a real app
 
-## Design Decisions
+The [Verevoir starter](https://github.com/verevoir/astro-sanity-starter) embeds this editor inside [`@verevoir/admin`](https://www.npmjs.com/package/@verevoir/admin) with a live preview iframe and tag-based release scheduling.
 
-- **Fully controlled components** — no internal form state; `BlockEditor` takes `value` + `onChange`.
-- **Rich text = textarea for v1** — overridable via the override mechanism.
-- **Override mechanism** — `overrides` prop maps field names or UIHints to custom components.
-- **Zod introspection** — SelectField reads `ZodEnum.options`, ArrayField reads `ZodArray.element`, ObjectField reads `ZodObject.shape`.
-- **No `<form>` tag** — the developer controls form submission, styling, and layout.
+## Docs
 
-## Documentation
+- [Getting started](https://verevoir.io/docs/getting-started)
+- [Content controls](https://verevoir.io/docs/content-controls) — polymorphic sections for page builders
+- [Integration guide](https://verevoir.io/docs/integration)
 
-- [Getting Started](https://verevoir.io/docs/getting-started) — content model, storage, and editor in five minutes
-- [Content Controls](https://verevoir.io/docs/content-controls) — polymorphic content blocks for page builders
-- [Integration Guide](https://verevoir.io/docs/integration) — connecting content models, storage, editor, and more
+## License
 
-## Development
-
-```bash
-npm install    # Install dependencies (links @verevoir/schema from ../schema-engine)
-make build     # Compile via tsup (ESM + CJS + .d.ts)
-make test      # Run vitest (jsdom, no Docker needed)
-make lint      # Check formatting
-```
+MIT

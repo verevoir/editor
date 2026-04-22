@@ -1,6 +1,6 @@
 {
   "name": "@verevoir/editor",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "license": "MIT",
   "description": "Lightweight React content editing components driven by Verevoir schema definitions",
   "homepage": "https://verevoir.io",
@@ -13,6 +13,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./version-store": {
+      "types": "./dist/version-store.d.ts",
+      "import": "./dist/version-store.js",
+      "require": "./dist/version-store.cjs"
     },
     "./styles/*": "./dist/styles/*"
   },

@@ -1,4 +1,4 @@
-import { array, text } from '@verevoir/schema';
+import { array, text, type FieldDefinition } from '@verevoir/schema';
 
 /**
  * Shared field for any taggable block.
@@ -22,7 +22,7 @@ import { array, text } from '@verevoir/schema';
  * want autocomplete or a curated vocabulary can override the field
  * component via the BlockEditor's `overrides` prop.
  */
-export function tagsField() {
+export function tagsField(): { tags: FieldDefinition } {
   return {
     tags: array('Tags', text('Tag'))
       .default([])

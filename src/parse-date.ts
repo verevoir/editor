@@ -164,3 +164,23 @@ function parseMonthDay(s: string, now: Date): Date | null {
 
   return null;
 }
+
+/**
+ * Compact, human-friendly date display. Drops the year when it
+ * matches the current local year — "20 Mar" for this year,
+ * "20 Mar 2025" for older. Accepts an ISO string, a millisecond
+ * timestamp, or a Date.
+ *
+ * Returns an empty string when the input is unparseable, so call
+ * sites can render the result without an extra falsy check.
+ */
+export function formatNaturalDate(value: string | number | Date): string {
+  const d = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(d.getTime())) return '';
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  });
+}

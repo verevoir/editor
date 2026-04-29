@@ -63,7 +63,7 @@ export { tagsField, collectTags, filterByTag } from './tagging.js';
 
 // Natural-language date parsing (internal to DateTimeField; exposed
 // so tests and consumers can reuse — future home is @verevoir/time).
-export { parseNaturalDate } from './parse-date.js';
+export { parseNaturalDate, formatNaturalDate } from './parse-date.js';
 
 // Utilities
 export { unwrapSchema, inferUIHint } from './utils.js';

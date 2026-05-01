@@ -53,7 +53,7 @@ export function PreviewFrame({
         <input
           type="range"
           data-preview-zoom-slider=""
-          min={25}
+          min={33}
           max={100}
           step={5}
           value={zoom}
@@ -71,11 +71,18 @@ export function PreviewFrame({
         >
           <div
             data-preview-surface=""
-            style={{
-              width: viewport.width,
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-            }}
+            style={
+              {
+                width: viewport.width,
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+                // Exposed so descendants (e.g. the editor-premium
+                // ControlOverlay toolbar) can divide their layout
+                // sizes by it and remain a constant size in screen
+                // pixels regardless of zoom.
+                '--preview-zoom': scale,
+              } as React.CSSProperties
+            }
           >
             {children}
           </div>

@@ -24,6 +24,22 @@
   margin-bottom: 4px;
 }
 
+/* The fieldset's <legend> is the visible label; the sibling
+ * <label htmlFor> exists only so the inner input has an explicit
+ * accessible-name association. Hide it from sighted users without
+ * removing it from the a11y tree. */
+[data-editor-form] [data-field] > [data-field-sr-label] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 [data-editor-form] [data-field] > input,
 [data-editor-form] [data-field] > textarea,
 [data-editor-form] [data-field] > select {

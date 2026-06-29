@@ -1,6 +1,6 @@
 {
   "name": "@verevoir/editor",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "license": "MIT",
   "description": "Lightweight React content editing components driven by Verevoir schema definitions",
   "homepage": "https://verevoir.io",
@@ -44,7 +44,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@verevoir/schema": "file:../schema-engine"
+    "@verevoir/schema": "^1.5.2"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

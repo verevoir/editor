@@ -1,4 +1,10 @@
-import { text, select, type StringField, type UIHint } from '@verevoir/schema';
+import {
+  text,
+  select,
+  type FieldDefinition,
+  type StringField,
+  type UIHint,
+} from '@verevoir/schema';
 
 /**
  * Local `datetime` helper — lives here instead of in @verevoir/schema
@@ -29,7 +35,11 @@ function datetime(label: string): StringField {
  * at any time regardless of the window. The window is only consulted
  * when status is 'published'.
  */
-export function publishFields() {
+export function publishFields(): {
+  status: FieldDefinition;
+  publishFrom: FieldDefinition;
+  publishTo: FieldDefinition;
+} {
   return {
     status: select('Status', ['draft', 'published', 'archived']).default(
       'draft',

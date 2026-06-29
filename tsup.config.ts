@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup';
 import { copyFileSync, mkdirSync } from 'fs';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/version-store.ts'],
+  entry: ['src/index.ts', 'src/version-store.ts', 'src/content-fields.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   clean: true,

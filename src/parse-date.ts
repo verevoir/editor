@@ -150,7 +150,7 @@ function parseMonthDay(s: string, now: Date): Date | null {
     if (month === undefined || day < 1 || day > 31) continue;
 
     const today = startOfDay(now);
-    let year = yearStr ? parseInt(yearStr, 10) : today.getFullYear();
+    const year = yearStr ? parseInt(yearStr, 10) : today.getFullYear();
     const candidate = new Date(year, month, day);
     // Catch overflow (e.g. "31 Feb" → 2/3 Mar). Reject those rather
     // than silently rolling forward to a date the user didn't type.

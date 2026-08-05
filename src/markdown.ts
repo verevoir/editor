@@ -41,6 +41,9 @@ function isSafeUrl(url: string): boolean {
   // use to bypass scheme checks — e.g. `java\tscript:alert(1)`. These
   // get ignored by browsers during URL parsing, so a scheme check that
   // doesn't normalise them is unsafe.
+  // Matching control characters is the point here: they are exactly what
+  // we strip, so the rule does not apply.
+  // eslint-disable-next-line no-control-regex
   const normalised = url.replace(/[\x00-\x1f\x7f]/g, '').trim();
   if (normalised === '') return false;
   return SAFE_URL_SCHEMES.test(normalised);
@@ -60,12 +63,10 @@ function processInline(text: string): string {
   // unsafe URL falls through as the raw markdown text — the user sees
   // `[click](javascript:...)` on the page, which is the right failure
   // mode: visibly broken, not silently exploitable.
-  result = result.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    (match, label, href) =>
-      isSafeUrl(href)
-        ? `<a href="${href}" rel="noopener noreferrer">${label}</a>`
-        : match,
+  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, href) =>
+    isSafeUrl(href)
+      ? `<a href="${href}" rel="noopener noreferrer">${label}</a>`
+      : match,
   );
   return result;
 }

@@ -33,6 +33,12 @@ export function DateTimeField({
   // another field edit resets this one). Guard against loops by only
   // resyncing when the incoming value would produce different display
   // strings than we currently show.
+  // Deliberately synchronising local display state to an external prop.
+  // set-state-in-effect warns about cascading renders; the equality guards
+  // above stop the cascade, and this only fires when `value` actually
+  // changes. Deriving the text during render instead would fight the user
+  // mid-edit, which is the behaviour this field exists to avoid.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const nextDate = formatDate(value);
     const nextTime = formatTime(value);
@@ -41,6 +47,7 @@ export function DateTimeField({
     setParseError(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const commitDate = () => {
     const text = dateText.trim();

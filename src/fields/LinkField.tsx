@@ -174,7 +174,9 @@ export function LinkField({
         {search && (
           <button
             type="button"
-            onClick={() => (dropdownOpen ? setDropdownOpen(false) : openBrowse())}
+            onClick={() =>
+              dropdownOpen ? setDropdownOpen(false) : openBrowse()
+            }
             aria-label="Browse pages"
             title="Browse pages"
             data-link-browse

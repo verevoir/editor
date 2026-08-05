@@ -42,7 +42,8 @@ function makeStorage(): VersionStoreStorage {
           return dir === 'desc' ? bv - av : av - bv;
         });
       }
-      if (options?.limit !== undefined) results = results.slice(0, options.limit);
+      if (options?.limit !== undefined)
+        results = results.slice(0, options.limit);
       return results.map((d) => ({ id: d.id, data: d.data }));
     },
     async create(blockType, data) {
@@ -76,7 +77,10 @@ describe('createVersionStore', () => {
   });
 
   it('saves a draft and reads it back by id', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const created = await store.save({
       id: 'placeholder',
       slug: '/about',
@@ -94,7 +98,10 @@ describe('createVersionStore', () => {
   });
 
   it('publishes a version and exposes it via getPublishedBySlug', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const v1 = await store.save({
       id: '',
       slug: '/about',
@@ -113,7 +120,10 @@ describe('createVersionStore', () => {
   });
 
   it('publishing a new version archives the prior published version', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const v1 = await store.save({
       id: '',
       slug: '/about',
@@ -139,7 +149,10 @@ describe('createVersionStore', () => {
   });
 
   it('listLatestPerSlug returns one record per slug, highest version', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const a = await store.save({
       id: '',
       slug: '/a',
@@ -167,7 +180,10 @@ describe('createVersionStore', () => {
   });
 
   it('listVersions returns all versions for a slug newest first', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const v1 = await store.save({
       id: '',
       slug: '/x',
@@ -184,7 +200,10 @@ describe('createVersionStore', () => {
   });
 
   it('unpublish demotes published back to draft', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const v1 = await store.save({
       id: '',
       slug: '/a',
@@ -202,7 +221,10 @@ describe('createVersionStore', () => {
   });
 
   it('archive sets status to archived', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const v1 = await store.save({
       id: '',
       slug: '/a',
@@ -218,7 +240,10 @@ describe('createVersionStore', () => {
   });
 
   it('delete removes the version document', async () => {
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     const v1 = await store.save({
       id: '',
       slug: '/a',
@@ -234,10 +259,18 @@ describe('createVersionStore', () => {
 
   it('getById returns null for the wrong block type', async () => {
     // Simulate a doc of a different blockType — store should ignore it.
-    await storage.create('article', { slug: '/x', status: 'draft', version: 1, updatedAt: 0 });
+    await storage.create('article', {
+      slug: '/x',
+      status: 'draft',
+      version: 1,
+      updatedAt: 0,
+    });
     const created = await storage.list('article');
     const otherId = created[0].id;
-    const store = createVersionStore<PageContent>({ storage, blockType: 'page' });
+    const store = createVersionStore<PageContent>({
+      storage,
+      blockType: 'page',
+    });
     expect(await store.getById(otherId)).toBeNull();
   });
 });

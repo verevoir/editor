@@ -650,9 +650,7 @@ describe('TableArrayField', () => {
         onChange={() => {}}
       />,
     );
-    expect(
-      container.querySelectorAll('[data-list-array-grip]').length,
-    ).toBe(2);
+    expect(container.querySelectorAll('[data-list-array-grip]').length).toBe(2);
     expect(screen.getAllByLabelText('Move up')).toHaveLength(2);
     expect(screen.getAllByLabelText('Move down')).toHaveLength(2);
   });

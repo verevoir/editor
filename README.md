@@ -69,8 +69,8 @@ const article = defineBlock({
   fields: {
     title: text('Title'),
     body: richText('Body'),
-    ...publishFields(),  // status, publishFrom, publishTo
-    ...tagsField(),      // tags: string[]
+    ...publishFields(), // status, publishFrom, publishTo
+    ...tagsField(), // tags: string[]
   },
 });
 ```

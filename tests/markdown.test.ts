@@ -61,15 +61,17 @@ describe('markdownToHtml', () => {
   });
 
   it('rejects javascript: URLs and renders them as plain text', () => {
-    expect(
-      markdownToHtml('[click](javascript:alert(1))'),
-    ).toBe('<p>[click](javascript:alert(1))</p>');
+    expect(markdownToHtml('[click](javascript:alert(1))')).toBe(
+      '<p>[click](javascript:alert(1))</p>',
+    );
   });
 
   it('rejects data: URLs (HTML exfil / phishing vector)', () => {
     expect(
       markdownToHtml('[click](data:text/html,<script>alert(1)</script>)'),
-    ).toBe('<p>[click](data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;)</p>');
+    ).toBe(
+      '<p>[click](data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;)</p>',
+    );
   });
 
   it('rejects vbscript: URLs', () => {
